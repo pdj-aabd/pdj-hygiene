@@ -1,0 +1,1912 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F07300">
+<meta name="color-scheme" content="light">
+<title>PDJ & Hygiène AABD</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+:root{
+  --bg:#FAF7F2; --card:#FFFFFF; --ink:#1F1B16; --muted:#6B6258; --line:#E3DACD;
+  --accent:#F07300; --accent-soft:#FDEBD9; --accent-ink:#8A4200;
+  --ok:#1E7B34; --ok-soft:#E3F2E6; --bad:#B42318; --bad-soft:#FBE7E5;
+  --info:#4B5A8C; --info-soft:#E7EAF4; --radius:14px; --tap:56px;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;padding-bottom:calc(78px + env(safe-area-inset-bottom))}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:inherit}
+.top{position:sticky;top:0;z-index:5;background:var(--card);border-bottom:3px solid var(--accent);padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.brand b{font-size:19px}.brand small{display:block;color:var(--muted);font-size:12px}
+.net{font-size:13px;padding:4px 10px;border-radius:99px;background:var(--bad-soft);color:var(--bad);font-weight:600}
+main{max-width:720px;margin:0 auto;padding:16px}
+h2{font-size:22px;margin:4px 0 6px;line-height:1.2}
+h3{font-size:18px;margin:0 0 10px}
+.hint{color:var(--muted);margin:0 0 14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:14px}
+.banner{border-radius:var(--radius);padding:12px 14px;margin-bottom:14px;font-size:15px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.banner.warn{background:var(--accent-soft);color:var(--accent-ink);border:1px solid #F5C99B}
+.banner.bad{background:var(--bad-soft);color:var(--bad);border:1px solid #F1B8B2}
+.banner.info{background:var(--info-soft);color:var(--info);border:1px solid #C9D0E6}
+.banner.ok{background:var(--ok-soft);color:var(--ok);border:1px solid #B9DEC1}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:var(--tap);padding:10px 18px;border-radius:12px;border:2px solid var(--ink);background:var(--card);font-weight:700;cursor:pointer;text-decoration:none;text-align:center}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.ok{background:var(--ok);border-color:var(--ok);color:#fff}
+.btn.danger{border-color:var(--bad);color:var(--bad)}
+.btn.ghost{border-color:var(--line)}
+.btn.small{min-height:48px;padding:6px 14px;font-size:15px}
+.btn[disabled]{opacity:.45;pointer-events:none}
+.btn.block{display:flex;width:100%}
+.hero{display:flex;width:100%;min-height:96px;font-size:22px;border-radius:18px}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.row>.btn{flex:1 1 140px}
+label.f{display:block;font-weight:700;margin:14px 0 6px}
+label.f .opt{font-weight:400;color:var(--muted)}
+.inp{width:100%;min-height:var(--tap);padding:10px 14px;border:2px solid var(--line);border-radius:12px;background:#fff}
+.inp:focus{outline:none;border-color:var(--accent)}
+textarea.inp{min-height:90px;resize:vertical}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{min-height:50px;padding:8px 14px;border-radius:12px;border:2px solid var(--line);background:#fff;font-weight:600;cursor:pointer;text-align:left}
+.chip.on{border-color:var(--accent);background:var(--accent-soft);color:var(--accent-ink)}
+.stepper{display:flex;align-items:center;gap:8px}
+.stepper button{width:58px;height:58px;border-radius:12px;border:2px solid var(--ink);background:#fff;font-size:28px;font-weight:700;cursor:pointer;flex:0 0 auto}
+.stepper input{width:96px;text-align:center;font-size:28px;font-weight:800;min-height:58px;border:2px solid var(--line);border-radius:12px;background:#fff}
+.small-stepper button{width:46px;height:46px;font-size:22px}
+.small-stepper input{width:64px;font-size:20px;min-height:46px}
+.muted{color:var(--muted)} .small{font-size:14px}
+code{background:#F1ECE4;padding:1px 5px;border-radius:5px;font-size:14px;word-break:break-all}
+/* Service */
+.svc-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.svc-head .t{font-size:20px;font-weight:800}
+.bar{height:10px;border-radius:99px;background:var(--line);overflow:hidden;margin-top:10px}
+.bar i{display:block;height:100%;background:var(--accent);border-radius:99px}
+.now{background:var(--accent);color:#fff;border:0}
+.now .l{font-size:14px;opacity:.9;font-weight:600}
+.now .t{font-size:21px;font-weight:800;margin:2px 0 10px}
+.now .btn{background:#fff;color:var(--accent-ink);border-color:#fff}
+.phases{display:grid;gap:8px}
+.ph{display:grid;grid-template-columns:40px 1fr auto;gap:10px;align-items:center;text-decoration:none;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;min-height:64px}
+.ph .ic{font-size:24px;text-align:center}
+.ph .t{font-weight:700;line-height:1.2}
+.ph .s{color:var(--muted);font-size:14px}
+.pill{display:inline-block;padding:4px 10px;border-radius:99px;font-size:13px;font-weight:700;white-space:nowrap}
+.p-ok{background:var(--ok-soft);color:var(--ok)}
+.p-todo{background:#EEEAE4;color:var(--muted)}
+.p-run{background:var(--accent-soft);color:var(--accent-ink)}
+.p-bad{background:var(--bad-soft);color:var(--bad)}
+.p-late{background:var(--bad-soft);color:var(--bad)}
+.checks{display:grid;gap:8px}
+.ck{display:grid;grid-template-columns:44px 1fr;gap:10px;align-items:center;width:100%;min-height:62px;text-align:left;background:#fff;border:2px solid var(--line);border-radius:12px;padding:8px 12px;cursor:pointer}
+.ck .box{width:36px;height:36px;border-radius:9px;border:3px solid var(--muted);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;color:#fff}
+.ck.on{border-color:var(--ok);background:var(--ok-soft)}
+.ck.on .box{background:var(--ok);border-color:var(--ok)}
+.ck .h{display:block;color:var(--muted);font-size:14px;font-weight:400;margin-top:2px}
+.ck .who{display:block;color:var(--ok);font-size:13px;font-weight:600}
+.ck b{font-weight:700}
+.sec{font-weight:800;margin:18px 0 8px;font-size:15px;text-transform:uppercase;letter-spacing:.03em;color:var(--muted)}
+.rule{background:var(--accent-soft);color:var(--accent-ink);border-radius:12px;padding:10px 12px;margin:8px 0 12px;font-size:15px}
+.rule.bad{background:var(--bad-soft);color:var(--bad)}
+.rule.info{background:var(--info-soft);color:var(--info)}
+.rule.ok{background:var(--ok-soft);color:var(--ok)}
+/* Températures */
+.trow{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px}
+.trow .n{font-weight:700;display:flex;justify-content:space-between;gap:8px;align-items:center}
+.tin{display:flex;align-items:center;gap:8px;margin-top:8px}
+.tin .sign{width:56px;min-width:56px;height:56px;border-radius:12px;border:2px solid var(--ink);background:#fff;font-size:22px;font-weight:800;cursor:pointer}
+.tin .inp{font-size:24px;font-weight:700;max-width:150px}
+.tin span{font-weight:700;color:var(--muted)}
+.verdict{display:inline-block;padding:5px 10px;border-radius:10px;font-weight:800;border:2px solid;font-size:14px}
+.v-ok{background:var(--ok-soft);color:var(--ok);border-color:var(--ok)}
+.v-tol{background:var(--accent-soft);color:var(--accent-ink);border-color:var(--accent)}
+.v-bad{background:var(--bad-soft);color:var(--bad);border-color:var(--bad)}
+.tval{font-size:22px;font-weight:800}
+.tmeta{color:var(--muted);font-size:13px}
+.round-h{display:flex;justify-content:space-between;align-items:center;margin:18px 0 8px}
+.round-h b{font-size:18px}
+/* Listes, tableaux, accordéons */
+table.t{width:100%;border-collapse:collapse;font-size:15px}
+table.t th{text-align:left;color:var(--muted);font-weight:600;border-bottom:2px solid var(--line);padding:6px 4px}
+table.t td{border-bottom:1px solid var(--line);padding:7px 4px;vertical-align:top}
+details.acc{background:#fff;border:1px solid var(--line);border-radius:12px;margin-bottom:8px}
+details.acc>summary{list-style:none;cursor:pointer;padding:14px;min-height:56px;font-weight:700;display:flex;justify-content:space-between;align-items:center;gap:8px}
+details.acc>summary::-webkit-details-marker{display:none}
+details.acc>summary::after{content:'＋';font-size:20px;color:var(--accent)}
+details.acc[open]>summary::after{content:'－'}
+details.acc>div{padding:0 14px 14px}
+ol.steps6{counter-reset:s;list-style:none;padding:0;margin:0;display:grid;gap:6px}
+ol.steps6 li{counter-increment:s;display:grid;grid-template-columns:34px 1fr;gap:10px;align-items:start}
+ol.steps6 li::before{content:counter(s);width:30px;height:30px;border-radius:99px;background:var(--ink);color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:15px}
+ul.tight{margin:6px 0;padding-left:20px}
+ul.tight li{margin:3px 0}
+.items{display:grid;gap:8px}
+.item{display:grid;grid-template-columns:1fr auto;gap:4px 10px;align-items:center;text-decoration:none;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;min-height:60px}
+.item .t{font-weight:700}
+.item .s{color:var(--muted);font-size:14px}
+.fam{display:inline-block;border-radius:8px;padding:3px 8px;font-size:13px;font-weight:700;margin:2px 4px 2px 0;border:2px solid}
+.fam.dd{border-color:#1257A8;color:#1257A8}.fam.dn{border-color:#2A7A34;color:#2A7A34}.fam.dg{border-color:#B31E1E;color:#B31E1E}
+.fam.dt{border-color:#8A4200;color:#8A4200}.fam.sol{border-color:#6B6258;color:#6B6258}.fam.eau{border-color:#4B5A8C;color:#4B5A8C}
+.col{display:grid;grid-template-columns:54px 1fr;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+.col .sw{height:38px;border-radius:8px;border:2px solid var(--ink)}
+/* Allergènes */
+.algrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.al{display:flex;align-items:center;gap:8px;min-height:54px;padding:6px 10px;border-radius:12px;border:2px solid var(--line);background:#fff;font-weight:700;cursor:pointer;text-align:left}
+.al.on{border-color:var(--bad);background:var(--bad-soft);color:var(--bad)}
+.al .e{font-size:22px}
+.prod{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px}
+.prod .pn{font-weight:800}
+.prod .cat{color:var(--muted);font-size:13px}
+.tag{display:inline-block;padding:3px 8px;border-radius:8px;font-size:13px;font-weight:700;margin:3px 4px 0 0}
+.tag.c{background:var(--bad-soft);color:var(--bad)}
+.tag.tr{background:var(--accent-soft);color:var(--accent-ink)}
+.tag.no{background:var(--ok-soft);color:var(--ok)}
+.tag.w{background:#FFF4C2;color:#6B5200}
+/* Signature, feuilles, toasts */
+.sigwrap{border:2px dashed var(--muted);border-radius:12px;background:#fff;position:relative}
+.sigwrap canvas{display:block;width:100%;height:200px;touch-action:none;border-radius:12px}
+.sigwrap .ph2{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#B8AFA3;pointer-events:none;font-size:18px}
+.sigbar{display:flex;justify-content:space-between;align-items:center;margin-top:6px;color:var(--muted);font-size:14px}
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--card);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr);padding-bottom:env(safe-area-inset-bottom)}
+.tabs a{min-height:64px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-decoration:none;font-weight:700;font-size:12px;color:var(--muted);gap:2px}
+.tabs a .ic{font-size:22px;line-height:1}
+.tabs a.on{color:var(--accent);box-shadow:inset 0 3px 0 var(--accent)}
+.sheet-bg{position:fixed;inset:0;background:rgba(31,27,22,.5);z-index:20;display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:var(--bg);width:100%;max-width:720px;max-height:92vh;overflow:auto;border-radius:18px 18px 0 0;padding:16px 16px calc(20px + env(safe-area-inset-bottom))}
+.sheet-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px}
+.toast{position:fixed;left:16px;right:16px;bottom:calc(84px + env(safe-area-inset-bottom));z-index:40;background:var(--ink);color:#fff;border-radius:12px;padding:14px 16px;font-weight:600;text-align:center;opacity:0;transform:translateY(10px);transition:.2s;pointer-events:none;max-width:680px;margin:0 auto}
+.toast.show{opacity:1;transform:none}
+.toast.err{background:var(--bad)}
+.thumbs{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.thumbs img{width:96px;height:96px;object-fit:cover;border-radius:10px;border:1px solid var(--line)}
+.nav-btns{display:grid;grid-template-columns:1fr 2fr;gap:10px;margin-top:20px}
+.big-date{font-size:30px;font-weight:900;color:var(--accent-ink);line-height:1.1}
+.label-prev{border:2px dashed var(--ink);border-radius:10px;padding:10px 12px;background:#fff;font-size:16px;margin-top:10px}
+.q{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px}
+.q .opts{display:grid;gap:6px;margin-top:8px}
+.q .opt{min-height:52px;text-align:left;padding:8px 12px;border-radius:10px;border:2px solid var(--line);background:#fff;cursor:pointer;font-weight:600}
+.q .opt.good{border-color:var(--ok);background:var(--ok-soft);color:var(--ok)}
+.q .opt.wrong{border-color:var(--bad);background:var(--bad-soft);color:var(--bad)}
+.q .why{margin-top:8px;font-size:15px}
+.charte h4{margin:14px 0 4px;font-size:16px}
+.charte ul{margin:4px 0;padding-left:20px}
+.charte li{margin:3px 0}
+.qr{display:flex;justify-content:center;padding:14px;background:#fff;border-radius:12px}
+.empty{color:var(--muted);text-align:center;padding:26px 10px}
+dl.kv{display:grid;grid-template-columns:minmax(120px,42%) 1fr;gap:6px 12px;margin:0}
+dl.kv dt{color:var(--muted)} dl.kv dd{margin:0;font-weight:600;word-break:break-word}
+@media print{ .top,.tabs,.noprint,#toast{display:none!important} body{padding:0;background:#fff} }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand"><b>PDJ & Hygiène</b><small>Adagio Access Brussels Delta</small></div>
+  <span id="net" class="net" hidden>Hors ligne</span>
+</header>
+<main id="view"></main>
+<nav class="tabs">
+  <a href="#/" data-tab="home"><span class="ic">☕</span>Service</a>
+  <a href="#/clean" data-tab="clean"><span class="ic">🧽</span>Nettoyage</a>
+  <a href="#/allerg" data-tab="allerg"><span class="ic">⚠️</span>Allergènes</a>
+  <a href="#/memo" data-tab="memo"><span class="ic">📖</span>Règles</a>
+  <a href="#/plus" data-tab="plus"><span class="ic">☰</span>Plus</a>
+</nav>
+<div id="sheet"></div>
+<div id="toast" class="toast"></div>
+<input id="cam" type="file" accept="image/*" capture="environment" hidden>
+
+<script>
+'use strict';
+const APP_VERSION = '1.1.0';
+const CHARTE_VERSION = '2026-09';
+
+/* ============================================================
+   RÉFÉRENTIEL SANITAIRE (R1 — 30/09/2026)
+   Sources : charte « Bonnes pratiques d'hygiène en cuisine » AABD, fiches de relevé plats chauds/froids,
+   PRO-REC-01 (AR 13/07/2014), PND-BUF-01, procédure Cuissons & Pertes.
+   ⚠ Seuils à faire valider par le référent HACCP. Toute modification = nouvelle version (REF.version) :
+   chaque mesure enregistre la version appliquée, les anciennes mesures ne sont jamais recalculées.
+   ============================================================ */
+// R2 : limites légales de l'AR du 13/07/2014 (annexe IV) + cibles internes AABD, affichées séparément.
+const REF = {
+  version: 'R2 · 30/09/2026 (AR 13/07/2014)',
+  pos:   { cible: 4, legal: 7 },       // frigos : légal ≤ 7 °C · cible interne ≤ 4 °C (limite plus stricte possible par frigo)
+  neg:   { legal: -18, tol: -15 },     // congélateurs : légal ≤ −18 °C · remontée tolérée jusqu'à −15 °C
+  froid: { cible: 5, legal: 7, jeter: 10 }, // buffet froid : légal ≤ 7 °C · cible interne ≤ 5 °C
+  chaud: { legal: 60, bas: 55, cible: 65 }, // buffet chaud : légal ≥ 60 °C à cœur · cible interne ≥ 65 °C
+  lv:    { ok: 85 },                   // lave-vaisselle : rinçage ≥ 85 °C (contrôle hebdomadaire)
+  refroid: { t: 10, h: 2 },            // refroidissement : < 10 °C en 2 h max, puis ≤ 7 °C (circulaire AFSCA)
+  surplus: { froid: 24, cuit: 48, pain: 24 }, // surplus NON exposés aux clients : durée interne max (h) — AFSCA 24–48 h
+  ouverture_jours: 3                   // produit ouvert sans indication sur l'emballage : 3 jours max (charte AABD)
+};
+
+const DEFAULTS = {
+  enceintes: [
+    { n:'Frigo office PDJ', t:'pos' }, { n:'Frigo lait machine à café', t:'pos' },
+    { n:'Frigo cuisine 1', t:'pos' }, { n:'Frigo cuisine 2', t:'pos' }, { n:'Congélateur cuisine', t:'neg' }
+  ],
+  chaud: ['Œufs brouillés', 'Lardons / bacon'],
+  froid: ['Charcuterie', 'Fromages', 'Yaourts / fromage blanc', 'Lait (buffet)'],
+  rounds: ['07:00', '08:30', '10:00']
+};
+
+/* ============================================================
+   CONTENU MÉTIER — tiré des documents AABD (checklist PDJ, PND-CUI-01, PND-BUF-01, PRO-REC-01,
+   PRO-FLU-01, charte d'hygiène, procédure cuissons, audit hygiène PDJ du 09/09/2026)
+   ============================================================ */
+const PHASES = [
+  { k:'poste', ic:'🧼', t:'Prise de poste', when:'Avant de toucher un aliment', type:'checks', items:[
+    ['p1','Mains lavées au savon, 30 secondes','Ongles, poignets, entre les doigts. Séchage au papier.'],
+    ['p2','Tenue de travail propre + tablier PDJ','Jamais de tenue civile en service (audit 09/09).'],
+    ['p3','Cheveux attachés + charlotte / coiffe',''],
+    ['p4','Ni bijou ni montre · GSM personnel au casier','GSM personnel interdit en cuisine, office, plonge, réserve et buffet pendant le service (sauf urgence autorisée).'],
+    ['p5','Je suis en état de travailler','Vomissements, diarrhée, fièvre, plaie infectée : je préviens le responsable AVANT de toucher un aliment. Plaie : pansement + gant.'],
+    ['p6','Lave-mains accessible et approvisionné','Savon, papier, poubelle à couvercle. Rien devant le lave-mains (audit 09/09).'],
+    ['p7','Thermomètre sonde propre et désinfecté',''],
+    ['p8','Trousseau de clés PDJ pris',''],
+    ['p9','Smartphone de service : chargé, nettoyé, rangé dans son support','Jamais sur un plan de travail, un chariot de denrées ou dans un frigo. Après l\'avoir touché : mains lavées avant de toucher un aliment.']
+  ]},
+  { k:'t_open', ic:'🌡️', t:'Frigos & congélateurs — ouverture', when:'En arrivant', type:'enceintes', ctx:'open' },
+  { k:'cuisson', ic:'🥐', t:'Cuissons', when:'À partir de 4h30', type:'cuisson', items:[
+    ['c1','Viennoiseries dégelées au moins 15 min avant cuisson',''],
+    ['c2','Maximum 10 pièces par grille, sur papier sulfurisé','Ne jamais mélanger pains et viennoiseries sur une même grille.'],
+    ['c3','Quantités selon le calcul (pas de diminution sans accord)',''],
+    ['c4','Cuissons refroidies 10 min dans l\'office avant dressage',''],
+    ['c5','Omelettes préparées dans la dernière heure (20 min à 160 °C), gardées en cocotte sur l\'induction','']
+  ]},
+  { k:'miseplace', ic:'🍽️', t:'Mise en place du buffet', when:'Avant 7h00', type:'checks', items:[
+    ['m1','Plaque froide allumée AVANT d\'y poser les produits',''],
+    ['m2','Machine à café allumée, bacs remplis (café, cacao, lait)','Le lait reste au froid : relever aussi le frigo lait.'],
+    ['m3','Machine à jus allumée',''],
+    ['m4','Cuiseur à œufs allumé, eau entre MIN et MAX','Mollets 3 min · durs 9 min.'],
+    ['m5','Buffet dressé : tout est présent',''],
+    ['m6','Charcuterie, fromages, lait, jus sortis au DERNIER moment, posés sur la plaque froide','Contrôle HACCP : jamais en avance.'],
+    ['m7','Plats chauds sur l\'induction allumée, couvercles en place',''],
+    ['m8','Une pince / un couvert de service propre par produit',''],
+    ['m9','Affiche « Information allergènes » visible',''],
+    ['m10','Tables et chaises propres et alignées (et la cour si ouverte)',''],
+    ['m11','Télévision allumée (La Une ou France 24) · liste des PDJ prise','']
+  ]},
+  { k:'buffet', ic:'🌡️', t:'Températures du buffet', when:'7h00 · 8h30 · 10h00', type:'buffet' },
+  { k:'service', ic:'☕', t:'Pendant le service', when:'7h00 – 10h00', type:'checks', items:[
+    ['s1','Réassort en petites quantités : jamais de produit neuf versé sur l\'ancien','On change le bac ou le plat.'],
+    ['s2','Coulures essuyées au fil du service (lavette dédiée au buffet)',''],
+    ['s3','Pinces, poignées et boutons désinfectés 2 à 3 fois',''],
+    ['s4','Vaisselle en suffisance sur le buffet',''],
+    ['s5','Tasses et couverts pré-nettoyés à l\'éponge avant le lave-verres',''],
+    ['s6','Clients accueillis, n° de chambre pointé · PDJ non réservés : signature puis réception',''],
+    ['s7','Vaisselle sale jamais près du buffet · chariot propre prioritaire à la porte','Un seul flux franchit la porte à la fois.'],
+    ['s8','Mains lavées après avoir débarrassé, avant de toucher le propre','']
+  ]},
+  { k:'debarras', ic:'📦', t:'Débarrassage & restes', when:'Après 10h00', type:'debarras', items:[
+    ['d1','Froid retiré EN PREMIER (température de fin relevée)',''],
+    ['d2','Plaque froide éteinte après débarrassage',''],
+    ['d3','Restes chauds (œufs, lardons) jetés','Un produit maintenu au chaud ne se ressert pas.'],
+    ['d4','Jus et lait du buffet jetés',''],
+    ['d5','Tout ce qui a été exposé aux clients est jeté : charcuterie, fromages, pain, viennoiseries, fruits coupés, yaourts ouverts','AFSCA : un reste exposé au client est un déchet. Jamais conservé, ni pour le buffet, ni pour le personnel.'],
+    ['d6','Portions emballées restées fermées et au froid (yaourts, beurre, confitures, capsules) : remises au frigo ou dans leur boîte','Emballage abîmé, ouvert ou resté hors du froid → jeté.'],
+    ['d7','Surplus jamais sortis au buffet (restés à l\'office ou au frigo) : enregistrés ci-dessous, étiquetés, rangés','Sinon : jetés.'],
+    ['d8','Fruits entiers retirés du buffet et de leurs paniers',''],
+    ['d11','Rafraîchisseurs de carafe remis au congélateur','']
+  ]},
+  { k:'nettoyage', ic:'🧽', t:'Nettoyage de fin de service', when:'Après le débarrassage', type:'nettoyage', items:[
+    ['n1','Machine à café : nettoyage quotidien, puis remplie','cafe'],
+    ['n2','Buffet, « miroir » machine à café, socle plateau charcuterie','buffet'],
+    ['n3','Plaque froide','plaque'],
+    ['n4','Bacs chauds et plan induction','induction'],
+    ['n5','Cuiseur à œufs (eau chaude, brosse, vinaigre — BIEN rincer)','oeufs'],
+    ['n6','Grille-pain : tiroir à miettes vidé','toaster'],
+    ['n7','Machine à jus : bec et bac','jus'],
+    ['n8','Planche à pain, paniers et bacs viennoiseries','pain'],
+    ['n9','Four : programme de nettoyage lancé','four'],
+    ['n10','Micro-ondes propre','micro'],
+    ['n11','Lave-verres nettoyé, eau changée','lv'],
+    ['n12','Plan de travail et chariot de l\'office','plan'],
+    ['n13','Vaisselle lavée et rangée · tasses et verres rangés propres',''],
+    ['n14','Poignées de frigo, boutons, interrupteurs désinfectés','poignees'],
+    ['n15','Poubelles vidées (office, machine à jus), sacs neufs, couvercles fermés','poubelles'],
+    ['n16','Salle : miettes, tables, chaises, traces sur vitres et colonnes, sols aspirés (salle, office, mini-market)','salle'],
+    ['n17','Sols lavés (mezzanine + office)','sol'],
+    ['n18','Matériel de nettoyage lavé, rangé sec, rien au sol · sprays étiquetés, loin des aliments','materiel'],
+    ['n19','Torchons et tabliers sales en sac pressing (bagagerie)',''],
+    ['n20','Smartphone de service nettoyé et remis sur sa station de charge','gsm']
+  ]},
+  { k:'dlc', ic:'📅', t:'Dates, stocks & manquants', when:'Avant de partir', type:'dlc', items:[
+    ['l1','DLC contrôlées dans tous les frigos : aucun produit périmé','Audit 09/09 : filet de poulet et lardons périmés trouvés.'],
+    ['l2','Chaque produit entamé, décongelé ou déconditionné porte son étiquette','Ouvert le · à utiliser avant · initiales (audit 09/09).'],
+    ['l3','Le plus court devant (FEFO)',''],
+    ['l4','Rien au sol · aucun carton dans les frigos · produits filmés ou en boîte fermée',''],
+    ['l5','Œufs crus rangés à part des produits prêts à consommer','Audit 09/09.'],
+    ['l6','Produits d\'entretien jamais à côté des aliments','Audit 09/09.'],
+    ['l7','Congélateur cuisine réapprovisionné depuis le +2 (attention aux dates)',''],
+    ['l8','Frigo du personnel : aucun reste du buffet · surplus dont la date « à utiliser avant » est passée : jetés','Seuls les surplus non exposés, étiquetés, y ont leur place.'],
+    ['l9','Stocks vérifiés : étiquettes, plateaux, serviettes',''],
+    ['l10','Vidanges de bière montées au réfectoire du 2e','']
+  ]},
+  { k:'t_close', ic:'🌡️', t:'Frigos & congélateurs — fin de service', when:'En fin de service', type:'enceintes', ctx:'close' },
+  { k:'cloture', ic:'✍️', t:'Clôture & passation', when:'Pour terminer', type:'cloture' }
+];
+const PHASE = Object.fromEntries(PHASES.map(p => [p.k, p]));
+
+// Familles de produits de nettoyage : on indique ce qui convient, pas une marque imposée
+const FAM = {
+  dd:  { t:'Détergent-désinfectant alimentaire', ex:'ex. le produit rose type D10', why:'Surfaces en contact avec les aliments. Dose et temps de contact : voir l\'étiquette (souvent 5 min). Rincer à l\'eau potable.' },
+  dn:  { t:'Détergent neutre / universel', ex:'ex. le produit bleu type D2', why:'Pré-nettoyage, surfaces, salle, vaisselle à la main.' },
+  dg:  { t:'Dégraissant four / grill', ex:'produit four', why:'Gras cuit. Surface tiède, jamais brûlante. Gants + lunettes. Rincer abondamment.' },
+  dt:  { t:'Détartrant (acide)', ex:'ex. type D5, ou vinaigre blanc pour le petit matériel', why:'Calcaire. Jamais mélangé ni à la suite d\'un produit chloré sans rinçage.' },
+  sol: { t:'Nettoyant sol cuisine (dégraissant)', ex:'', why:'Sols de l\'office et de la cuisine. Panneau « sol mouillé ».' },
+  eau: { t:'Produit du fabricant de l\'appareil', ex:'pastilles, cycle de nettoyage', why:'Suivre la notice de l\'appareil.' },
+  ecran: { t:'Lingette désinfectante compatible écran', ex:'lingette à l\'alcool isopropylique 70 % ou celle recommandée par le fabricant', why:'Jamais de chlore, de produit alcalin ni de pulvérisation dans les ports, le micro ou le haut-parleur.' }
+};
+
+const SEQ6 = ['Débarrasser : déchets, restes, matériel', 'Nettoyer : détergent + frotter', 'Rincer à l\'eau', 'Désinfecter : laisser agir le temps indiqué sur l\'étiquette, sans essuyer', 'Rincer à l\'eau potable (contact aliment)', 'Sécher au papier à usage unique — jamais un torchon'];
+
+const FICHES = [
+  { k:'buffet', t:'Plan du buffet & façades', zone:'Salle PDJ', freq:'Après chaque service · coulures pendant le service', fam:['dd'], steps:SEQ6,
+    warn:['Chiffonnette dédiée au buffet, jamais celle du sol.','Ne pas oublier les façades (traces de mains à hauteur d\'enfant), le « miroir » de la machine à café et le socle du plateau charcuterie.'] },
+  { k:'plaque', t:'Plaque froide', zone:'Salle PDJ', freq:'Après chaque service', fam:['dd'],
+    steps:['Retirer tous les produits','Éteindre et laisser revenir à température ambiante (un désinfectant agit mal à 2 °C)','Nettoyer au détergent, rincer','Désinfecter, laisser agir, rincer à l\'eau potable','Sécher complètement','Rallumer avant le service suivant, avant d\'y poser les produits'],
+    warn:['Jamais de produit chaud posé dessus.','Ne jamais gratter le givre avec un objet métallique.','Écoulement des condensats bouché → prévenir la technique.'] },
+  { k:'induction', t:'Plan induction & bacs chauds', zone:'Salle PDJ', freq:'Après chaque service', fam:['dg','dd'],
+    steps:['Retirer les bacs : restes jetés, bacs au lave-vaisselle','Laisser tiédir la plaque','Gratter à tiède avec un grattoir vitrocéramique ou une spatule plastique','Dégraisser (bacon = gras cuit)','Rincer','Sécher'],
+    warn:['Jamais d\'eau sur une plaque chaude : la vitrocéramique casse.','Jamais de laine d\'acier ni de tampon abrasif.','Jamais de remise à niveau : on change le bac.'] },
+  { k:'cafe', t:'Machine à café', zone:'Salle PDJ', freq:'Chaque jour · nettoyage complet chaque samedi', fam:['eau','dd','dt'],
+    steps:['Lancer le programme de nettoyage du fabricant (pastilles) et le rinçage du circuit lait','Vider, laver et sécher le bac à marc et le bac d\'égouttage','Extérieur : chiffonnette imprégnée de désinfectant (jamais pulvériser sur l\'électrique), rincer, sécher','Remplir café, cacao, lait','Samedi : nettoyage complet selon la procédure (buse, groupe, filtre) · détartrage selon la notice'],
+    warn:['Le lait reste au froid : le frigo lait se contrôle comme les autres (oubli relevé à l\'audit du 09/09).'] },
+  { k:'jus', t:'Machine à jus', zone:'Salle PDJ', freq:'Après chaque service · lignes chaque semaine', fam:['dd'],
+    steps:['Vider','Démonter le bec, le bac et les pièces amovibles','Laver (lave-vaisselle ou détergent + brosse), rincer','Désinfecter, rincer à l\'eau potable','Sécher complètement avant de remonter'],
+    warn:['Une fois par semaine : cycle de nettoyage des lignes selon la notice.'] },
+  { k:'oeufs', t:'Cuiseur à œufs', zone:'Salle PDJ', freq:'Après chaque service', fam:['dt','dn'],
+    steps:['Débrancher, laisser refroidir','Vider l\'eau','Eau chaude + brosse métal + vinaigre (ou détartrant) sur le calcaire','BIEN rincer, plusieurs fois','Sécher'],
+    warn:['En service : l\'eau reste entre les repères MIN et MAX.','Détartrant : jamais mélangé à un produit chloré.'] },
+  { k:'toaster', t:'Grille-pain à convoyeur', zone:'Salle PDJ', freq:'Après chaque service · grilles chaque semaine', fam:['dd'],
+    steps:['Débrancher, laisser refroidir','Tirer les languettes : vider et laver le tiroir à miettes','Extérieur et poignées : chiffonnette imprégnée de désinfectant','Chaque semaine : grilles, goulotte et déflecteur brossés à sec'],
+    warn:['Jamais d\'eau dans l\'appareil.'] },
+  { k:'pain', t:'Planche à pain, paniers & bacs viennoiseries', zone:'Salle PDJ', freq:'Après chaque service · paniers à fruits le vendredi', fam:['dd','dn'],
+    steps:['Changer le papier à chaque service','Bacs et paniers vidés, brossés à sec','Planche à pain : détergent, rinçage, désinfection, rinçage, séchage','Vendredi : paniers à fruits lavés et séchés'],
+    warn:['Bois fendu, écharde ou moisissure → retirer du service.'] },
+  { k:'cereales', t:'Vases à céréales', zone:'Salle PDJ', freq:'Chaque semaine', fam:['dd'],
+    steps:['Vider entièrement','Démonter le bec et le couvercle','Laver (lave-vaisselle si compatible), rincer','Sécher À FOND : une goutte d\'eau = moisissure','Remplir'],
+    warn:['Jamais de recharge sur le fond : on vide, on lave, on remplit.','Insectes ou mites → prévenir le responsable (prestataire nuisibles).'] },
+  { k:'micro', t:'Micro-ondes', zone:'Office / cuisine', freq:'Après chaque utilisation', fam:['dn','dd'],
+    steps:['Retirer le plateau et le laver','Nettoyer l\'intérieur au détergent neutre','Désinfecter, rincer','Sécher, remettre le plateau'], warn:[] },
+  { k:'four', t:'Four', zone:'Cuisine', freq:'Programme chaque jour · dégraissage complet chaque semaine', fam:['dg'],
+    steps:['Chaque jour : lancer le programme de nettoyage','Chaque semaine : four tiède, porte ouverte, gants + lunettes','Appliquer le dégraissant, laisser pénétrer','Rincer complètement (un résidu passe dans les aliments)','Chauffer à vide avant la première utilisation'], warn:['Jamais de produit sur un four brûlant.'] },
+  { k:'lv', t:'Lave-verres / lave-vaisselle', zone:'Office / plonge', freq:'Chaque jour · cuve chaque semaine · détartrage 2×/mois', fam:['eau','dt'],
+    steps:['Chaque jour : vidanger, brosser les filtres, changer l\'eau, essuyer portes et joints','Chaque semaine : cuve, bras de lavage, gicleurs débouchés + température de rinçage (≥ 85 °C) ou assiette qui sort sèche','Deux fois par mois : détartrage'],
+    warn:['Tasses et couverts pré-nettoyés à l\'éponge avant le lave-verres.'] },
+  { k:'plan', t:'Plan de travail, chariot inox, armoires', zone:'Office / cuisine', freq:'Après usage et en fin de service', fam:['dd'], steps:SEQ6,
+    warn:['Planches à découper : lave-vaisselle, ou détergent + désinfection. Planche très entaillée → à jeter.'] },
+  { k:'poignees', t:'Poignées, boutons, interrupteurs', zone:'Partout', freq:'Deux fois par jour', fam:['dd'],
+    steps:['Imprégner une chiffonnette (jamais pulvériser sur un appareil électrique)','Poignées de frigo, portes, interrupteurs, boutons des appareils, robinets','Chiffonnette dédiée, jamais celle des plans de travail'], warn:['Point de contamination croisée le plus souvent oublié.'] },
+  { k:'frigo', t:'Frigos : intérieur, clayettes, joints', zone:'Office / cuisine', freq:'Frigo office chaque mercredi · frigos cuisine chaque mois', fam:['dn','dd'],
+    steps:['Transférer les denrées dans un autre frigo froid','Sortir les clayettes et bacs','Nettoyer au détergent, rincer','Désinfecter, rincer à l\'eau potable, sécher','Brosser les joints de porte (brosse souple)','Remettre en froid, recharger quand la température est bonne : cru en bas, prêt à consommer en haut'],
+    warn:['Joint noirci ou déchiré → demander son remplacement.','Aucun carton dans les frigos.'] },
+  { k:'congel', t:'Congélateur : dégivrage · condenseurs', zone:'Cuisine', freq:'Tous les 3 mois ou dès 3–5 mm de givre · condenseurs tous les 6 mois', fam:['dn','dd'],
+    steps:['Transférer les produits dans un autre congélateur ou une glacière avec plaques froides','Arrêter, débrancher','Dégivrage naturel ou bol d\'eau chaude posé à l\'intérieur','Nettoyer, rincer, désinfecter, rincer','SÉCHER complètement, redémarrer à vide','Recharger seulement à −18 °C ou plus froid','Tous les 6 mois : grilles de condenseur dépoussiérées à sec, appareil débranché'],
+    warn:['JAMAIS de couteau ni d\'eau bouillante sur les parois : on perce le circuit de froid.','Ne jamais recongeler un produit décongelé.'] },
+  { k:'poubelles', t:'Poubelles', zone:'Office / cuisine', freq:'Chaque jour', fam:['dn','dd'],
+    steps:['Vider avant saturation, fermer le sac, ne jamais tasser à la main','Laver et désinfecter le bac, sécher','Remettre un sac neuf, fermer le couvercle','Se laver les mains'],
+    warn:['Poubelle de cuisine toujours avec couvercle (audit 09/09).'] },
+  { k:'salle', t:'Salle petit-déjeuner', zone:'Salle PDJ', freq:'Après chaque service', fam:['dn'],
+    steps:['Enlever les miettes des tables et des chaises','Tables : détergent neutre, lavette jaune (surfaces générales)','Traces sur vitres (côté terrasse, parois de la mezzanine) et colonnes','Aspirer : salle, office, mini-market'], warn:[] },
+  { k:'sol', t:'Sols office & cuisine', zone:'Office / cuisine', freq:'Après chaque service · dessous des équipements chaque semaine', fam:['sol'],
+    steps:['Balayage humide (jamais à sec)','Laver au chariot de nettoyage (deux seaux)','Rincer si le produit l\'exige','Poser le panneau « sol mouillé » pendant le séchage','Chaque semaine : déplacer les équipements mobiles, nettoyer dessous et derrière'],
+    warn:['Un sol gras est glissant : risque d\'accident.'] },
+  { k:'materiel', t:'Matériel de nettoyage & produits', zone:'Local entretien', freq:'Après chaque usage', fam:[],
+    steps:['Seaux vidés, lavés, séchés — jamais d\'eau qui reste dedans','Mops et brosses suspendues tête en haut, jamais au sol','Lavettes au lavage (60 °C minimum) ou usage unique','Sprays étiquetés : nom du produit, date','Produits rangés au local entretien, jamais à côté des aliments'],
+    warn:['Jamais de produit transvasé dans une bouteille alimentaire.','Audit 09/09 : spray non identifié, produits à côté des denrées, raclette au sol.'] },
+  { k:'lavemains', t:'Lave-mains & éviers', zone:'Office / cuisine', freq:'Contrôle à chaque prise de poste · détartrage 2×/mois (lave-mains) et chaque semaine (éviers)', fam:['dd','dt'],
+    steps:['Savon, papier à usage unique, poubelle, eau chaude disponibles','Rien d\'entreposé devant ou dedans','Nettoyer, désinfecter, rincer','Détartrer robinet et vasque selon la fréquence'], warn:['Fuite ou commande défectueuse → prévenir la technique (audit 09/09).'] },
+  { k:'hotte', t:'Hotte et grilles', zone:'Cuisine', freq:'Chaque mois', fam:['dg'],
+    steps:['Déposer les filtres','Trempage dans un bac de dégraissant chaud (ou lave-vaisselle)','Rincer','Sécher complètement avant de reposer'], warn:['Un filtre reposé humide se recharge immédiatement.'] },
+  { k:'murs', t:'Murs, portes, plafonds', zone:'Cuisine & plonge', freq:'Murs et portes chaque mois · plafonds tous les 6 mois', fam:['dn','dd'],
+    steps:['Toujours du haut vers le bas','Détergent, rinçage, puis désinfection des zones proches des aliments','Joints brossés'], warn:['Carrelage descellé ou joint manquant → prévenir la technique.'] },
+  { k:'reserve', t:'Réserve sèche', zone:'Réserve', freq:'Chaque mois', fam:['dn','dd'],
+    steps:['Vider étagère par étagère','Contrôler les dates au passage (le plus court devant)','Nettoyer, désinfecter, sécher','Contrôler l\'absence de traces de nuisibles (déjections, emballages rongés)','Rien au sol, aucun carton de livraison'], warn:['Trace de nuisibles → prévenir immédiatement le responsable.'] }
+];
+FICHES.push({ k:'gsm', t:'Smartphone de service PDJ', zone:'Support mural, hors zone alimentaire', freq:'Début et fin de service · après souillure ou chute · entre deux utilisateurs', fam:['ecran'],
+  steps:['Retirer le GSM de son support, loin des aliments','Verrouiller l\'écran','Enlever les salissures visibles avec un chiffon propre','Passer la lingette sur l\'écran, la coque et les boutons, respecter le temps de contact','Ne rien pulvériser dans les ports, le micro ou le haut-parleur','Laisser sécher, remettre sur la station de charge','Se laver les mains avant de toucher un aliment'],
+  warn:['Jamais posé sur un plan de travail, une planche, un chariot de denrées, dans un frigo, sur le lave-vaisselle, la machine à café ou un rebord d\'évier.','Jamais utilisé en manipulant des denrées. Usage : app HACCP, appels professionnels, urgences.','GSM personnel : interdit en cuisine, office, plonge, réserve et buffet pendant le service (casier), sauf urgence autorisée.'] });
+const FICHE = Object.fromEntries(FICHES.map(f => [f.k, f]));
+
+// Nettoyages périodiques (planning AABD + checklist PDJ) — fréquence en jours, jour fixe éventuel (0 = dimanche)
+const FREQ = { hebdo:{ d:7, l:'Chaque semaine' }, q15:{ d:15, l:'2 fois par mois' }, mois:{ d:30, l:'Chaque mois' }, trim:{ d:91, l:'Tous les 3 mois' }, sem:{ d:182, l:'Tous les 6 mois' } };
+const PERIODIC = [
+  { k:'h_fruits', t:'Paniers à fruits lavés', f:'hebdo', day:5, fiche:'pain' },
+  { k:'h_cafe', t:'Machine à café : nettoyage complet (+ fermeture)', f:'hebdo', day:6, fiche:'cafe' },
+  { k:'h_frigo', t:'Frigo office : intérieur, clayettes, joints', f:'hebdo', day:3, fiche:'frigo' },
+  { k:'h_cereales', t:'Vases à céréales vidés, lavés, séchés', f:'hebdo', fiche:'cereales' },
+  { k:'h_four', t:'Four : dégraissage complet', f:'hebdo', fiche:'four' },
+  { k:'h_lv', t:'Lave-vaisselle : cuve, bras, gicleurs + T° de rinçage', f:'hebdo', fiche:'lv', temp:true },
+  { k:'h_armoires', t:'Armoires et étagères', f:'hebdo', fiche:'plan' },
+  { k:'h_evier', t:'Éviers : détartrage', f:'hebdo', fiche:'lavemains' },
+  { k:'h_dessous', t:'Dessous et arrière des équipements mobiles', f:'hebdo', fiche:'sol' },
+  { k:'q_lv', t:'Lave-vaisselle : détartrage', f:'q15', fiche:'lv' },
+  { k:'q_lm', t:'Lave-mains : détartrage', f:'q15', fiche:'lavemains' },
+  { k:'m_murs', t:'Murs et portes (cuisine, plonge)', f:'mois', fiche:'murs' },
+  { k:'m_hotte', t:'Hotte et grilles', f:'mois', fiche:'hotte' },
+  { k:'m_reserve', t:'Réserve sèche : étagères, dates, nuisibles', f:'mois', fiche:'reserve' },
+  { k:'m_frigos', t:'Frigos cuisine + congélateur : nettoyage complet', f:'mois', fiche:'frigo' },
+  { k:'m_chariot', t:'Chariot de débarrassage', f:'mois', fiche:'plan' },
+  { k:'m_armoires_buffet', t:'Armoires du buffet', f:'mois', fiche:'buffet' },
+  { k:'t_degivrage', t:'Congélateurs : dégivrage', f:'trim', fiche:'congel' },
+  { k:'s_plafonds', t:'Plafonds (cuisine, plonge)', f:'sem', fiche:'murs' },
+  { k:'s_condenseurs', t:'Grilles de condenseur dépoussiérées', f:'sem', fiche:'congel' }
+];
+const PER = Object.fromEntries(PERIODIC.map(p => [p.k, p]));
+const DAYS = ['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'];
+
+// Cuissons (procédure Cuissons & Pertes + fiche cuissons viennoiseries)
+const COOK = [
+  ['Croissants · pains au chocolat', '12 min', 'Four supérieur 185 °C', 'Bien dorés, croustillants — si mous, remettre un peu'],
+  ['Mini-torsades', '12 min', 'Four supérieur 185 °C', 'Dorées mais pas trop'],
+  ['Piccolos 85 g', '14 min', 'Four inférieur', 'Dorés, croquants'],
+  ['Pains diamants', '13 min', 'Four inférieur', 'Dorés mais pas trop, croquants'],
+  ['Baguette 280 g', '16 min', '170 °C', ''],
+  ['Sirocco 800 g', '16 min', '200 °C', 'Décongeler 60 min'],
+  ['Boulot multigraine 540 g', '14 min', '210 °C', 'Décongeler 60 min'],
+  ['Pain campagne 1 kg', '24 min', '200 °C', 'Décongeler 60 min'],
+  ['Pavé multicéréales 450 g', '16 min', '200 °C', 'Décongeler 10 min'],
+  ['Omelettes', '20 min', '160 °C', 'Dans la dernière heure, puis cocotte sur induction'],
+  ['Cramique · craquelin', '—', 'Décongeler la veille', 'Servir selon les PDJ réservés']
+];
+// Quantités : PDJ × présence (semaine 0,7 · week-end et jours fériés 0,6) × ratio produit — paramètres de la procédure cuissons
+const COOK_QTY = { presence:{ semaine:0.7, weekend:0.6 }, items:[
+  ['Croissants', 0.6], ['Pains au chocolat', 0.5], ['Mini-torsades', 0.6], ['Piccolos 85 g', 0.2], ['Pains diamants', 0.2],
+  ['B\'Break muesli', 0.1], ['B\'Break olives-romarin', 0.1], ['Pavé multicéréales', 0.1], ['Boulot multigraine', 0.1], ['Sirocco', 0.1], ['Pain campagne', 0.05]
+]};
+
+// Pertes de fin de service (checklist PDJ)
+const LOSSES = [
+  ['Viennoiseries', 'pcs', ['Croissant','Pain au chocolat','Mini-torsade','Cramique','Chausson pomme']],
+  ['Pains', 'pcs', ['Piccolo 85 g','Pain diamant','Baguette 280 g','Pain campagne 1 kg','Pavé multicéréales','Boulot multigraine','Sirocco','Pain toast blanc','Pain toast gris']],
+  ['Froid', 'pcs', ['Œufs','Filet de poulet (tr.)','Jambon (tr.)','Gouda (tr.)','Fromage belge (tr.)','Yaourt entier','Fromage blanc','Compote de pommes']],
+  ['Boissons', 'L', ['Jus d\'orange','Jus de pomme','Smoothie','Lait','Lait soja']]
+];
+
+// Allergènes : les 14 à déclaration obligatoire
+const AL = [
+  ['gluten','🌾','Gluten','blé, seigle, orge, avoine, épeautre'], ['crustaces','🦐','Crustacés',''], ['oeufs','🥚','Œufs',''],
+  ['poisson','🐟','Poisson',''], ['arachides','🥜','Arachides','cacahuètes'], ['soja','🫘','Soja','dont lécithine de soja'],
+  ['lait','🥛','Lait','dont lactose'], ['fruitscoque','🌰','Fruits à coque','amande, noisette, noix…'], ['celeri','🥬','Céleri',''],
+  ['moutarde','🟡','Moutarde',''], ['sesame','⚪','Sésame',''], ['sulfites','🍷','Sulfites','> 10 mg/kg'], ['lupin','🌼','Lupin',''], ['mollusques','🦪','Mollusques','']
+];
+const ALN = Object.fromEntries(AL.map(a => [a[0], a]));
+// Produits : [nom, catégorie, contient, traces, statut, note]
+// statut : '' = fiche fournisseur · 'old' = fiche ancienne · 'diff' = sources divergentes (on retient le plus strict) · 'nc' = non confirmé · 'x' = information non fiable
+const PRODS = [
+  ['Croissant au beurre','Viennoiseries & pains',['gluten','oeufs','lait'],['soja','fruitscoque','sesame'],'',''],
+  ['Pain au chocolat','Viennoiseries & pains',['gluten','oeufs','soja','lait'],['fruitscoque','sesame'],'',''],
+  ['Mini-torsade','Viennoiseries & pains',['gluten','oeufs','soja','lait','fruitscoque','sesame'],[],'',''],
+  ['Piccolo blanc','Viennoiseries & pains',['gluten'],['oeufs','lait','sesame'],'',''],
+  ['Petits pains diamants (mélange)','Viennoiseries & pains',['gluten','sesame'],['oeufs','soja','lait','fruitscoque'],'x','Liste 2026 : sésame en traces · fiche 2020 (losange sésame) : présent. On retient « contient ».'],
+  ['Pain toast blanc','Viennoiseries & pains',['gluten','soja','lait'],['sesame'],'',''],
+  ['Petit pain blanc sans gluten','Viennoiseries & pains',['soja'],['oeufs','lait','fruitscoque','sesame'],'',''],
+  ['Crêpes sucrées 18 cm','Viennoiseries & pains',['gluten','oeufs','lait'],[],'',''],
+  ['Gaufre vanille','Viennoiseries & pains',['gluten','oeufs','soja'],['lait'],'old','Fiche 2018.'],
+  ['Flocons d\'avoine gros BIO','Céréales',['gluten'],[],'x','Fiche incohérente (tous les allergènes cochés, non confirmée). L\'avoine contient du gluten. Lire l\'étiquette.'],
+  ['Flocons d\'avoine nature (portions)','Céréales',['gluten'],['soja'],'old','Fiche 2019.'],
+  ['Granola pomme-cannelle BIO','Céréales',[],[],'x','Fiche incohérente, non confirmée. Lire l\'étiquette avant de répondre.'],
+  ['Muesli 4 noten','Céréales',['gluten','fruitscoque'],['arachides','soja','lait','sesame'],'',''],
+  ['Müesli extra BIO','Céréales',['gluten','arachides','soja','lait','fruitscoque'],[],'',''],
+  ['Muesli sans gluten BIO','Céréales',[],[],'x','Fiche contradictoire (« sans gluten » mais gluten déclaré). Ne rien garantir : lire l\'étiquette.'],
+  ['Crackers granola cannelle-amande (sans gluten, vegan)','Céréales',['fruitscoque','sesame'],['soja'],'x','Gluten : information contradictoire sur la fiche. Lire l\'étiquette.'],
+  ['Jambon découenné dégraissé','Charcuterie & œufs',[],['gluten','oeufs','arachides','soja','lait','fruitscoque','celeri','moutarde'],'x','Liste 2026 : aucun allergène · fiche 2020 : nombreuses traces possibles. Vérifier l\'étiquette de la référence livrée.'],
+  ['Filet de poulet','Charcuterie & œufs',['soja','lait'],[],'x','Liste 2026 : aucun allergène · fiche 2017 : protéine de soja et lactose. Vérifier l\'étiquette.'],
+  ['Filet de Saxe','Charcuterie & œufs',[],[],'old','Fiche 2017.'],
+  ['Salami','Charcuterie & œufs',['lait'],['moutarde'],'old','Fiche 2017.'],
+  ['Bacon croustillant','Charcuterie & œufs',[],[],'',''],
+  ['Œufs brouillés','Charcuterie & œufs',['oeufs','lait','celeri'],[],'',''],
+  ['Œufs (coque)','Charcuterie & œufs',['oeufs'],[],'',''],
+  ['Beurre (portions)','Produits laitiers',['lait'],[],'',''],
+  ['Fromage en tranches / en cubes','Produits laitiers',['lait'],[],'',''],
+  ['Gouda jeune 48+','Produits laitiers',['lait'],[],'old','Fiche 2016.'],
+  ['Fromage fondu Délice de camembert','Produits laitiers',['lait'],[],'old','Fiche 2017.'],
+  ['Fromage frais / fromage blanc 0 %','Produits laitiers',['lait'],[],'',''],
+  ['Yaourt nature','Produits laitiers',['lait'],[],'',''],
+  ['Yaourt aromatisé aux fruits','Produits laitiers',['lait'],[],'old','Fiche 2017.'],
+  ['Lait (entier, demi-écrémé, coupelles)','Produits laitiers',['lait'],[],'',''],
+  ['Boisson soja non sucrée','Produits laitiers',['soja'],[],'',''],
+  ['Confitures (portions)','Tartinables & condiments',[],[],'',''],
+  ['Miel (portions)','Tartinables & condiments',[],[],'old','Fiche 2020.'],
+  ['Compote de pommes (portions)','Tartinables & condiments',[],[],'old','Fiche 2016.'],
+  ['Pâte à tartiner Nutella (capsules)','Tartinables & condiments',['fruitscoque','lait','soja'],[],'x','Pas de fiche dans le dossier : allergènes de l\'étiquette habituelle (noisettes, lait, lécithine de soja). Vérifier l\'emballage.'],
+  ['Sel (portions)','Tartinables & condiments',[],[],'x','Information non confirmée dans la liste 2026 (fiche 2020 : aucun allergène).'],
+  ['Poivre · sucre · sucre de canne · édulcorant','Tartinables & condiments',[],[],'old','Fiches 2019-2020.'],
+  ['Café en grains 80/20','Boissons',[],[],'x','Information non confirmée dans la liste 2026 (fiche 2019 incomplète).'],
+  ['Café soluble déca','Boissons',[],[],'old','Fiche 2019.'],
+  ['Cacao (machine)','Boissons',['lait'],[],'old','Fiche 2017.'],
+  ['Thés (Earl Grey, citron, fruits rouges, camomille, vert citron, vert menthe, Yellow Label, pêche-hibiscus)','Boissons',[],[],'old','Fiches 2019-2020.'],
+  ['Jus d\'orange · jus de pomme · eau','Boissons',[],[],'',''],
+  ['Fruits frais (pomme, banane, clémentine, melon, baies, abricot)','Fruits',[],[],'x','Fiches fournisseur sans tableau des allergènes.'],
+  ['Biscuit mini-madeleines','Biscuits & desserts',['gluten','oeufs','lait','fruitscoque'],['arachides','soja'],'',''],
+  ['Biscuits au beurre marbrés','Biscuits & desserts',['gluten','oeufs','lait'],['arachides','soja','fruitscoque','sesame'],'',''],
+  ['Biscuits original','Biscuits & desserts',['gluten','soja','lait'],[],'',''],
+  ['Cookie Dough (glace)','Biscuits & desserts',['gluten','oeufs','soja','lait'],[],'',''],
+  ['Strawberry cheesecake (glace)','Biscuits & desserts',['gluten','oeufs','soja','lait'],[],'x','Information non confirmée.'],
+  ['Chocolate fudge brownie (glace)','Biscuits & desserts',[],[],'x','Aucune information fiable : lire l\'étiquette.'],
+  ['Chips original','Shop (mini-market)',['gluten','soja','lait'],[],'',''],
+  ['Pizza margherita','Shop (mini-market)',['gluten','soja','lait','moutarde'],[],'x','Information non confirmée.'],
+  ['Penne pesto au poulet','Shop (mini-market)',[],[],'x','Fiche incohérente : lire l\'étiquette.'],
+  ['Tagliatelle poulet champignons','Shop (mini-market)',[],[],'x','Fiche incohérente : lire l\'étiquette.'],
+  ['Bonbons Starmix · Dragibus','Shop (mini-market)',['gluten','lait'],[],'',''],
+  ['Bonbons pêches, Tangfastics, grenouilles, oursons, Mega roulette','Shop (mini-market)',[],['gluten','lait'],'',''],
+  ['Cristal fruit · menthes','Shop (mini-market)',[],[],'','']
+];
+const ST_LABEL = { old:'Fiche ancienne', diff:'Sources divergentes', nc:'Non confirmé', x:'À vérifier sur l\'étiquette' };
+
+// Engagement hygiène (charte AABD + points de l'audit du 09/09/2026)
+const CHARTE = [
+  ['🧼 Hygiène personnelle', [
+    'Je me lave les mains (savon, 30 s) en arrivant, après chaque interruption, les toilettes, les poubelles, le linge sale, les emballages de livraison, après avoir toussé, éternué ou fumé, et avant de mettre des gants.',
+    'Les gants ne remplacent pas le lavage des mains : je les change à chaque changement de tâche.',
+    'Tenue de travail propre et tablier PDJ, jamais ma tenue de ville. Charlotte / coiffe en cuisine.',
+    'Ni bijoux ni montre.',
+    'Mon GSM personnel reste au casier : il est interdit en cuisine, office, plonge, réserve et buffet pendant le service, sauf urgence autorisée. Le smartphone de service PDJ sert uniquement aux tâches prévues (app HACCP, appels professionnels, urgences) ; il reste sur son support, jamais sur un plan de travail. Après l\'avoir touché, je me lave les mains avant de toucher un aliment.',
+    'Je ne mange pas et ne bois pas en cuisine ni dans l\'office : pas de tasse sur le plan de travail.',
+    'Vomissements, diarrhée, fièvre, plaie infectée : je préviens le responsable avant de toucher un aliment. Une plaie est couverte d\'un pansement et d\'un gant.'
+  ]],
+  ['🌡️ Températures', [
+    'Limites légales : froid ≤ 7 °C (frigos et buffet froid) · congélateurs ≤ −18 °C · chaud ≥ 60 °C à cœur. Nos cibles internes, plus strictes : frigos ≤ 4 °C, buffet froid ≤ 5 °C, buffet chaud ≥ 65 °C.',
+    'Je mesure avec le thermomètre à sonde (pas l\'afficheur du frigo) et je désinfecte la sonde après usage.',
+    'Je note chaque relevé. Un relevé non noté n\'existe pas. Tout écart est corrigé et noté.',
+    'Le froid est sorti au dernier moment et retiré en premier. Un produit chaud trop froid est jeté, jamais resservi.'
+  ]],
+  ['🍽️ Restes du buffet', [
+    'Tout ce qui a été exposé aux clients est un déchet : jeté, jamais conservé, ni pour le buffet ni pour le personnel.',
+    'Seul un surplus jamais sorti au buffet peut être gardé : au frigo dans les 2 h, étiqueté, 24 h maximum (48 h pour un plat cuit refroidi sous 10 °C en 2 h), réchauffé à 60 °C une seule fois.'
+  ]],
+  ['📅 Dates et stockage', [
+    'Un produit ouvert, décongelé ou déconditionné reçoit une étiquette : produit, ouvert le, à utiliser avant, initiales. Sans indication sur l\'emballage : 3 jours maximum, jamais au-delà de la date d\'origine.',
+    'Le plus court devant (FEFO). Un produit périmé est retiré immédiatement.',
+    'Rien au sol, aucun carton dans les frigos, produits filmés ou en boîte fermée. Œufs crus rangés à part.',
+    'Produits d\'entretien jamais à côté des aliments. Spray toujours étiqueté.'
+  ]],
+  ['🧽 Nettoyage', [
+    'Débarrasser → nettoyer → rincer → désinfecter (temps de contact) → rincer → sécher. Un désinfectant sur une surface sale ne désinfecte pas.',
+    'Une couleur de lavette = une zone. Matériel rangé sec, jamais au sol. Poubelles fermées.',
+    'Je ne mélange jamais un détartrant (acide) et un produit chloré.'
+  ]],
+  ['⚠️ Allergènes', [
+    'Je connais les 14 allergènes. Je ne garantis jamais « sans » de mémoire : je consulte l\'aide-mémoire et l\'étiquette.',
+    '« Traces possibles » = déconseillé à une personne allergique. En cas de doute, je ne sers pas et je préviens le responsable.'
+  ]],
+  ['🚪 Propre / sale', [
+    'Le sale ne croise jamais le propre. À la porte commune, le chariot propre passe en premier. La vaisselle sale reste loin du buffet.'
+  ]],
+  ['📣 Je signale', [
+    'Tout écart, panne, nuisible, produit suspect ou client malade : je préviens immédiatement le responsable et je le note. Je ne cache jamais un problème.'
+  ]]
+];
+const QUIZ = [
+  ['Le frigo de l\'office affiche 9 °C au thermomètre. Que faites-vous ?', ['C\'est normal le matin, je continue','J\'isole ou je transfère les produits, je préviens le responsable et je note l\'action','Je baisse le réglage et je n\'en parle pas'], 1, 'Au-delà de 7 °C, les produits sensibles sont isolés et le responsable décide. Tout écart est noté.'],
+  ['Les œufs brouillés du buffet sont à 52 °C.', ['Je les remets à chauffer et je les ressers','Je les jette, je cherche la cause et je remets un bac neuf','J\'ajoute des œufs chauds par-dessus'], 1, 'Sous 55 °C : on jette, on corrige la cause, on remet un bac neuf. Jamais de remise à niveau.'],
+  ['Un client allergique aux fruits à coque demande s\'il peut manger un croissant.', ['« Oui, il n\'y en a pas »','Je consulte l\'aide-mémoire : traces possibles, donc je le déconseille et je ne garantis rien','« Je pense que non »'], 1, 'Le croissant peut contenir des traces de fruits à coque. On ne garantit jamais « sans » de mémoire.'],
+  ['J\'ouvre un jambon aujourd\'hui, rien n\'est indiqué sur l\'emballage et sa date est dans 10 jours. À utiliser avant ?', ['Dans 10 jours','Dans 3 jours','Dans 7 jours'], 1, 'Sans indication : 3 jours après ouverture maximum (et jamais au-delà de la date d\'origine).'],
+  ['Quand changer de gants ?', ['En fin de service','Quand ils sont visiblement sales','À chaque changement de tâche, après s\'être lavé les mains'], 2, 'Des gants gardés d\'une tâche à l\'autre contaminent autant que des mains sales.'],
+  ['Où ranger le spray de nettoyage ?', ['Sur l\'étagère des produits du buffet','Au local entretien, étiqueté, loin des aliments','Sous l\'évier, à côté des œufs'], 1, 'Produits chimiques jamais à côté des denrées, spray toujours étiqueté (écart relevé à l\'audit du 09/09).']
+];
+QUIZ.splice(4, 0, ['À 10h, il reste des tranches de jambon sur le plateau du buffet, à 5 °C.', ['Je les filme et je les remets au frigo pour demain','Je les jette : elles ont été exposées aux clients','Je les mets au frigo du personnel'], 1, 'Un produit exposé aux clients est un déchet (AFSCA), même s\'il est resté au froid.']);
+const FONCTIONS = ['Petit-déjeuner','Réception','Nuit (cuissons)','Housekeeping','Étudiant / stagiaire','Responsable','Autre'];
+const ECART_CATS = ['Température','Produit périmé / suspect','Allergène','Nuisible','Panne d\'équipement','Nettoyage','Produit chimique','Blessure / accident','Client malade','Autre'];
+const MISSING = ['Pastilles sel','Détergent (D2)','Désinfectant (D10)','Sacs poubelle','Charlottes','Gants','Savon mains','Papier essuie-mains','Étiquettes','Plateaux','Serviettes'];
+
+/* ============================================================
+   Stockage local unique (IndexedDB) — toute la persistance passe ici
+   ============================================================ */
+const Store = (() => {
+  const DB = 'aabd-pdj', VER = 1;
+  let dbp = null;
+  function open(){
+    if (dbp) return dbp;
+    dbp = new Promise((res, rej) => {
+      const r = indexedDB.open(DB, VER);
+      r.onupgradeneeded = () => {
+        const db = r.result;
+        ['services:id','outbox:eventId','engagements:id'].forEach(s => { const [n, k] = s.split(':'); if (!db.objectStoreNames.contains(n)) db.createObjectStore(n, { keyPath:k }); });
+        if (!db.objectStoreNames.contains('meta')) db.createObjectStore('meta');
+      };
+      r.onsuccess = () => res(r.result);
+      r.onerror = () => rej(r.error);
+    });
+    return dbp;
+  }
+  async function run(store, mode, fn){
+    const db = await open();
+    return new Promise((res, rej) => {
+      const tx = db.transaction(store, mode);
+      const req = fn(tx.objectStore(store));
+      let out;
+      if (req) req.onsuccess = () => { out = req.result; };
+      tx.oncomplete = () => res(out);
+      tx.onerror = () => rej(tx.error);
+      tx.onabort = () => rej(tx.error || new Error('Transaction annulée'));
+    });
+  }
+  return {
+    all: s => run(s, 'readonly', st => st.getAll()),
+    get: (s, k) => run(s, 'readonly', st => st.get(k)),
+    put: (s, v, k) => run(s, 'readwrite', st => k === undefined ? st.put(v) : st.put(v, k)),
+    del: (s, k) => run(s, 'readwrite', st => st.delete(k))
+  };
+})();
+async function getSettings(){
+  const s = await Store.get('meta', 'settings');
+  return Object.assign({ relayUrl:'', token:'', pin:'', enceintes:DEFAULTS.enceintes, chaud:DEFAULTS.chaud, froid:DEFAULTS.froid,
+    rounds:DEFAULTS.rounds, thermoId:'', thermoCalib:'', names:[], persisted:null }, s || {});
+}
+const saveSettings = s => Store.put('meta', s, 'settings');
+async function getEtat(){ return (await Store.get('meta', 'etat')) || { at:null, data:{ engagements:[], periodic:{}, handover:null } }; }
+
+/* ============================================================
+   Utilitaires
+   ============================================================ */
+const $ = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => [...r.querySelectorAll(s)];
+const V = $('#view');
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const nowIso = () => new Date().toISOString();
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+const TZ = 'Europe/Brussels';
+const DTF = new Intl.DateTimeFormat('fr-BE', { timeZone:TZ, day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit', hourCycle:'h23', weekday:'short' });
+function parts(iso){ const p = {}; DTF.formatToParts(iso ? new Date(iso) : new Date()).forEach(x => p[x.type] = x.value); return p; }
+function fmt(iso){ if (!iso) return '—'; const p = parts(iso); return `${p.day}/${p.month}/${p.year} ${p.hour}:${p.minute}`; }
+const fmtD = iso => fmt(iso).slice(0, 10);
+const fmtH = iso => iso ? fmt(iso).slice(11) : '—';
+const ymd = iso => { const p = parts(iso); return `${p.year}-${p.month}-${p.day}`; };
+const ymdFr = s => s ? s.split('-').reverse().join('/') : '—';
+const weekday = iso => new Date(new Date(iso || Date.now()).toLocaleString('en-US', { timeZone:TZ })).getDay();
+const nowHM = () => { const p = parts(); return `${p.hour}:${p.minute}`; };
+const longDate = iso => new Date(iso || Date.now()).toLocaleDateString('fr-BE', { timeZone:TZ, weekday:'long', day:'numeric', month:'long' });
+const daysBetween = (a, b) => Math.floor((new Date(b) - new Date(a)) / 86400000);
+const normName = s => String(s || '').trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/\s+/g, ' ');
+const initials = n => String(n || '').split(/[\s-]+/).filter(Boolean).map(w => w[0].toUpperCase()).join('');
+const toNum = v => { const n = parseFloat(String(v ?? '').replace(/−/g, '-').replace(',', '.').trim()); return Number.isFinite(n) ? n : null; };
+const fmtT = n => n === null || n === undefined ? '—' : String(n).replace('.', ',').replace('-', '−') + ' °C';
+const fmtN = n => String(n).replace('.', ',');
+function toast(msg, err=false){
+  const el = $('#toast'); el.textContent = msg; el.className = 'toast show' + (err ? ' err' : '');
+  clearTimeout(toast._t); toast._t = setTimeout(() => el.className = 'toast', err ? 4200 : 2600);
+}
+function chips(group, options, selected, multi){
+  const sel = multi ? (selected || []) : [selected];
+  return `<div class="chips" data-group="${group}" ${multi ? 'data-multi' : ''}>${options.map(o => `<button type="button" class="chip${sel.includes(o) ? ' on' : ''}" data-v="${esc(o)}">${esc(o)}</button>`).join('')}</div>`;
+}
+function bindChips(root, group, onPick){
+  const g = $(`[data-group="${group}"]`, root); if (!g) return;
+  const multi = g.hasAttribute('data-multi');
+  g.addEventListener('click', e => {
+    const b = e.target.closest('.chip'); if (!b) return;
+    if (multi) b.classList.toggle('on'); else { $$('.chip', g).forEach(c => c.classList.toggle('on', c === b)); }
+    onPick(multi ? $$('.chip.on', g).map(c => c.dataset.v) : b.dataset.v);
+  });
+}
+function stepper(name, value, step=1, small=false){
+  return `<div class="stepper${small ? ' small-stepper' : ''}" data-stepper="${esc(name)}" data-step="${step}"><button type="button" data-d="-1" aria-label="moins">−</button>
+    <input inputmode="decimal" value="${esc(value ?? '')}" aria-label="${esc(name)}"><button type="button" data-d="1" aria-label="plus">+</button></div>`;
+}
+function bindSteppers(root, onChange){
+  $$('[data-stepper]', root).forEach(st => {
+    const inp = $('input', st), step = parseFloat(st.dataset.step);
+    const set = v => { v = Math.max(0, step % 1 ? Math.round(v * 10) / 10 : Math.round(v)); inp.value = fmtN(v); onChange(st.dataset.stepper, v); };
+    $$('button', st).forEach(b => b.onclick = () => set((toNum(inp.value) || 0) + step * +b.dataset.d));
+    inp.onchange = () => { const v = toNum(inp.value); if (v === null) { inp.value = ''; onChange(st.dataset.stepper, null); } else set(v); };
+  });
+}
+
+/* ---------- Photos ---------- */
+async function compressImage(file){
+  const url = URL.createObjectURL(file);
+  try {
+    const img = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = url; });
+    const max = 1400, r = Math.min(1, max / Math.max(img.width, img.height));
+    const c = document.createElement('canvas'); c.width = Math.round(img.width * r); c.height = Math.round(img.height * r);
+    c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+    return c.toDataURL('image/jpeg', 0.7);
+  } finally { URL.revokeObjectURL(url); }
+}
+function takePhoto(){
+  return new Promise(res => {
+    const inp = $('#cam'); inp.value = '';
+    inp.onchange = async () => { const f = inp.files && inp.files[0]; res(f ? await compressImage(f) : null); };
+    inp.click();
+  });
+}
+
+/* ---------- Signature au doigt ---------- */
+function mountSignature(canvas, onChange){
+  const dpr = Math.max(1, window.devicePixelRatio || 1);
+  const r = canvas.getBoundingClientRect();
+  canvas.width = Math.round(r.width * dpr); canvas.height = Math.round(r.height * dpr);
+  const ctx = canvas.getContext('2d');
+  ctx.lineWidth = 2.6 * dpr; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.strokeStyle = '#111';
+  let drawing = false, last = null, ink = 0;
+  const pos = e => { const b = canvas.getBoundingClientRect(); return { x:(e.clientX - b.left) * dpr, y:(e.clientY - b.top) * dpr }; };
+  canvas.addEventListener('pointerdown', e => { drawing = true; last = pos(e); canvas.setPointerCapture(e.pointerId); ctx.beginPath(); ctx.arc(last.x, last.y, ctx.lineWidth / 2, 0, Math.PI * 2); ctx.fillStyle = '#111'; ctx.fill(); ink++; e.preventDefault(); });
+  canvas.addEventListener('pointermove', e => {
+    if (!drawing) return;
+    const p = pos(e); ctx.beginPath(); ctx.moveTo(last.x, last.y); ctx.lineTo(p.x, p.y); ctx.stroke();
+    ink += Math.hypot(p.x - last.x, p.y - last.y) / dpr; last = p; e.preventDefault();
+  });
+  const end = () => { if (drawing) { drawing = false; onChange && onChange(); } };
+  ['pointerup','pointercancel','pointerleave'].forEach(ev => canvas.addEventListener(ev, end));
+  return {
+    isEmpty: () => ink < 25,
+    clear(){ ctx.clearRect(0, 0, canvas.width, canvas.height); ink = 0; onChange && onChange(); },
+    toPng(){
+      const w = 600, h = Math.round(canvas.height * w / canvas.width);
+      const c = document.createElement('canvas'); c.width = w; c.height = h;
+      const x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, w, h); x.drawImage(canvas, 0, 0, w, h);
+      return c.toDataURL('image/png');
+    }
+  };
+}
+const signatureBlock = () => `<div class="sigwrap"><canvas></canvas><div class="ph2">Signez ici avec le doigt</div></div>
+  <div class="sigbar"><span>Signature</span><button type="button" class="btn small ghost" data-sig-clear>Effacer</button></div>`;
+function wireSignature(root){
+  const cv = $('.sigwrap canvas', root), ph = $('.sigwrap .ph2', root);
+  const sig = mountSignature(cv, () => { ph.hidden = !sig.isEmpty(); });
+  $('[data-sig-clear]', root).onclick = () => sig.clear();
+  return sig;
+}
+
+/* ============================================================
+   Évaluation des températures (référentiel R1)
+   ============================================================ */
+const KIND_LABEL = { pos:'Frigo', neg:'Congélateur', froid:'Buffet froid', chaud:'Buffet chaud', lv:'Lave-vaisselle' };
+const PLAUSIBLE = { pos:[-6, 25], neg:[-40, 5], froid:[-5, 30], chaud:[0, 110], lv:[20, 100] };
+// lim : limite plus stricte propre à un frigo (ex. produit dont l'étiquette impose ≤ 4 °C) — jamais plus haute que la loi
+function evalT(kind, v, lim){
+  const R = REF;
+  if (kind === 'pos'){
+    const legal = lim !== undefined && lim !== null && lim < R.pos.legal ? lim : R.pos.legal, cible = Math.min(R.pos.cible, legal);
+    const lab = legal < R.pos.legal ? `limite de ce frigo ${fmtT(legal)}` : 'limite légale 7 °C';
+    if (v <= cible) return { verdict:'Conforme', cls:'ok' };
+    if (v <= legal) return { verdict:'À surveiller', cls:'tol', msg:`Conforme (${lab}) mais au-dessus de la cible interne (${fmtT(cible)}) : vérifiez porte, joint, chargement et réglage. Re-mesurez plus tard.` };
+    return { verdict:'Non conforme', cls:'bad', critical:true, msg:`Au-dessus de la ${lab}.`, todo:['Ne servez aucun produit sensible de ce frigo','Transférez les produits dans un autre frigo froid, ou isolez-les avec « NE PAS UTILISER »','Prévenez le responsable : c\'est lui qui décide du rebut','Cherchez la cause : porte mal fermée, joint, frigo trop chargé, panne','Re-mesurez dans 30 minutes'],
+      actions:['Produits transférés dans un autre frigo','Produits isolés « NE PAS UTILISER »','Responsable prévenu','Technique prévenue (panne)'], multi:true,
+      causes:['Porte mal fermée','Joint abîmé','Trop chargé','Panne','Inconnue'], remeasure:true };
+  }
+  if (kind === 'neg'){
+    if (v <= R.neg.legal) return { verdict:'Conforme', cls:'ok' };
+    if (v <= R.neg.tol) return { verdict:'À surveiller', cls:'tol', msg:'Au-dessus de −18 °C (remontée tolérée jusqu\'à −15 °C) : porte bien fermée ? givre ? Re-mesurez plus tard.' };
+    return { verdict:'Non conforme', cls:'bad', critical:true, todo:['Ne recongelez jamais un produit décongelé','Transférez les produits dans un autre congélateur, ou isolez-les avec « NE PAS UTILISER »','Prévenez le responsable : c\'est lui qui décide du rebut','Cherchez la cause : porte, givre, panne','Re-mesurez dans 30 minutes'],
+      actions:['Produits transférés dans un autre congélateur','Produits isolés « NE PAS UTILISER »','Responsable prévenu','Technique prévenue (panne)'], multi:true,
+      causes:['Porte mal fermée','Trop de givre','Panne','Inconnue'], remeasure:true };
+  }
+  if (kind === 'froid'){
+    const causes = ['Plaque froide éteinte / mal réglée','Trop de quantité sortie','Sorti trop tôt','Autre'];
+    if (v <= R.froid.cible) return { verdict:'Conforme', cls:'ok' };
+    if (v <= R.froid.legal) return { verdict:'À surveiller', cls:'tol', msg:'Conforme à la loi (≤ 7 °C) mais au-dessus de la cible interne (5 °C) : sortez de plus petites quantités, vérifiez la plaque froide.' };
+    return { verdict:'Non conforme', cls:'bad', critical: v > R.froid.jeter, msg:'Limite légale de 7 °C dépassée.',
+      todo:['Retirez le produit exposé et jetez-le : il ne retourne pas au frigo','Remplacez-le par une petite quantité sortie du frigo','Corrigez la cause (plaque froide allumée ? produit bien posé dessus ?)','Prévenez le responsable si la plaque froide ne refroidit pas'],
+      actions:['Produit jeté et remplacé','Produit jeté, plus servi'], causes };
+  }
+  if (kind === 'chaud'){
+    if (v >= R.chaud.cible) return { verdict:'Conforme', cls:'ok' };
+    if (v >= R.chaud.legal) return { verdict:'À surveiller', cls:'tol', msg:'Conforme à la loi (≥ 60 °C) mais sous la cible interne (65 °C) : montez un peu l\'induction, gardez le couvercle.' };
+    if (v >= R.chaud.bas) return { verdict:'Écart', cls:'tol', msg:'Sous la limite légale de 60 °C.', todo:['Réchauffez immédiatement (induction plus forte, couvercle) jusqu\'à 65 °C','Re-mesurez : toujours sous 60 °C → on jette'],
+      actions:['Réchauffé — re-mesure à faire'], causes:['Induction trop basse','Pas de couvercle','Bac resté trop longtemps','Autre'], remeasure:true, mustRemeasure:true };
+    return { verdict:'Non conforme', cls:'bad', critical:true, msg:'Très en dessous de la limite légale de 60 °C.', todo:['Jetez le contenu du bac : on ne réchauffe pas pour resservir','Trouvez la cause : induction trop basse ou éteinte, pas de couvercle, bac resté trop longtemps','Remettez un bac neuf, cuit à cœur'],
+      actions:['Jeté et remplacé par un bac neuf'], causes:['Induction trop basse / éteinte','Pas de couvercle','Bac resté trop longtemps','Autre'] };
+  }
+  if (kind === 'lv'){
+    if (v >= R.lv.ok) return { verdict:'Conforme', cls:'ok' };
+    return { verdict:'Non conforme', cls:'bad', todo:['N\'utilisez pas une vaisselle qui sort tiède ou humide','Relancez un cycle : l\'assiette doit sortir sèche','Prévenez la technique'], actions:['Technique prévenue','Vaisselle relavée'], multi:true, causes:[] };
+  }
+}
+const VCLS = { ok:'v-ok', tol:'v-tol', bad:'v-bad' };
+const verdictTag = t => t ? `<span class="verdict ${VCLS[t.cls]}">${esc(t.verdict)}</span>` : '';
+
+/* ============================================================
+   Service en cours
+   ============================================================ */
+let S = null;          // service ouvert (IndexedDB « services »)
+let unlocked = false;  // réglages déverrouillés (code responsable)
+
+async function loadOpenService(){
+  const all = await Store.all('services');
+  S = all.filter(s => !s.closedAt).sort((a, b) => b.startedAt.localeCompare(a.startedAt))[0] || null;
+}
+async function saveS(){ if (S) await Store.put('services', S); }
+function newService(name, reserved){
+  const at = nowIso(), p = parts(at);
+  return { id:`PDJ-${p.year}${p.month}${p.day}-${p.hour}${p.minute}`, date:ymd(at), operator:name, startedAt:at, reserved,
+    weekend:[0, 6].includes(weekday(at)), holiday:false, checks:{}, temps:[], ecarts:[], periodic:{}, cook:{ by:name, qty:{} },
+    losses:{}, retires:[], surplus:[], missing:[], missingOther:'', counts:{}, handover:'', nonFaitMotif:'', ref:REF.version, closedAt:null };
+}
+function tempKey(ctx, obj){ return ctx + '|' + obj; }
+function getTemp(ctx, obj){ return S.temps.find(t => t.key === tempKey(ctx, obj)); }
+async function roundsOf(){ const s = await getSettings(); return s.rounds; }
+
+// Statut d'une phase
+function phaseStatus(p, st){
+  const s = S;
+  const ecartIn = keys => s.ecarts.some(e => keys.includes(e.ctx));
+  if (['checks','dlc','cuisson','nettoyage','debarras'].includes(p.type)){
+    const n = p.items.length, d = p.items.filter(i => s.checks[p.k + '.' + i[0]]).length;
+    return { done:d, total:n, state: d === n ? 'ok' : d ? 'run' : 'todo', txt: `${d}/${n}` };
+  }
+  // Une phase de relevés est « faite » quand tout est mesuré ; « fait · écart » s'il y a eu un écart (traité)
+  const tState = (d, n, bad) => d === n ? (bad ? 'bad' : 'ok') : d ? 'run' : 'todo';
+  if (p.type === 'enceintes'){
+    const n = st.enceintes.length, got = st.enceintes.map(e => getTemp(p.ctx, e.n)).filter(Boolean);
+    return { done:got.length, total:n, state: tState(got.length, n, got.some(t => t.cls === 'bad')), txt:`${got.length}/${n}` };
+  }
+  if (p.type === 'buffet'){
+    const objs = st.chaud.concat(st.froid), rs = ['r1','r2','r3'];
+    let d = 0; rs.forEach(r => objs.forEach(o => { if (getTemp(r, o)) d++; }));
+    const bad = s.temps.some(t => rs.includes(t.ctx) && t.cls !== 'ok');
+    return { done:d, total:objs.length * 3, state: tState(d, objs.length * 3, bad), txt:`${d}/${objs.length * 3}` };
+  }
+  if (p.type === 'cloture') return { state: s.closedAt ? 'ok' : 'todo', txt: s.closedAt ? 'Clôturé' : 'À faire' };
+  return { state:'todo', txt:'' };
+}
+const PILL = { ok:['p-ok','Fait'], run:['p-run','En cours'], todo:['p-todo','À faire'], bad:['p-bad','Fait · écart'], late:['p-late','En retard'] };
+const isDone = st => st === 'ok' || st === 'bad';
+
+/* ---------- Nettoyages périodiques : échéances ---------- */
+// Tâche jamais enregistrée : on part d'une date de référence décalée selon la tâche,
+// pour étaler les échéances au démarrage au lieu de tout demander le premier jour.
+const PLAN_EPOCH = '2026-10-01';
+function virtualLast(p){
+  let h = 0; for (const c of p.k) h = (h * 31 + c.charCodeAt(0)) % 997;
+  const d = new Date(PLAN_EPOCH + 'T12:00:00'); d.setDate(d.getDate() - (h % FREQ[p.f].d));
+  return d.toISOString().slice(0, 10);
+}
+function periodicInfo(p, etat, today){
+  const local = S && S.periodic[p.k];
+  const remote = etat.data.periodic && etat.data.periodic[p.k];
+  const real = [local && local.at, remote && remote.at].filter(Boolean).sort().pop() || null;
+  const last = real || (p.day === undefined ? virtualLast(p) : null);
+  const age = last ? daysBetween(ymd(last), today) : null;
+  const per = FREQ[p.f].d, wd = weekday(today + 'T12:00:00');
+  let due = false, late = false;
+  if (p.day !== undefined){
+    if (wd === p.day && (age === null || age >= 5)) due = true;
+    if (age === null ? false : age > per + 1) { due = true; late = true; }
+    if (age === null && wd !== p.day) { due = false; }
+  } else {
+    if (age === null || age >= per) due = true;
+    if (age !== null && age > per + 2) late = true;
+  }
+  return { last: real, age, due, late: late && !!real, doneToday: !!(local && local.at) };
+}
+function dueToday(etat){
+  const today = S ? S.date : ymd();
+  return PERIODIC.map(p => Object.assign({ p }, periodicInfo(p, etat, today))).filter(x => x.due || x.doneToday);
+}
+
+/* ============================================================
+   File d'envoi (outbox) vers le relais Apps Script
+   ============================================================ */
+async function queue(kind, payload, attachments){
+  const ev = { eventId: kind + '-' + uid(), kind, createdAt: nowIso(), tries:0, lastError:'', payload: Object.assign({ kind }, payload), attachments: attachments || [] };
+  ev.payload.eventId = ev.eventId;
+  await Store.put('outbox', ev);
+  flushOutbox();
+  return ev.eventId;
+}
+let flushing = false;
+async function relay(body){
+  const s = await getSettings();
+  const r = await fetch(s.relayUrl, { method:'POST', headers:{ 'Content-Type':'text/plain;charset=utf-8' }, body: JSON.stringify(Object.assign({}, body, { token:s.token })) });
+  const j = await r.json().catch(() => ({ ok:false, error:'Réponse illisible du relais (HTTP ' + r.status + ')' }));
+  if (!j.ok) throw new Error(j.error || 'Refusé par le relais');
+  return j;
+}
+async function flushOutbox(){
+  if (flushing) return;
+  const s = await getSettings();
+  if (!s.relayUrl || !s.token || !navigator.onLine) { refreshChrome(); return; }
+  flushing = true;
+  let sent = 0;
+  try {
+    const items = (await Store.all('outbox')).sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+    for (const ev of items){
+      try {
+        await relay(Object.assign({}, ev.payload, { attachments: ev.attachments }));
+        await Store.del('outbox', ev.eventId); sent++;
+        if (ev.kind === 'cloture'){ const sv = await Store.get('services', ev.payload.report.id); if (sv){ sv.sentAt = nowIso(); await Store.put('services', sv); } }
+        if (ev.kind === 'engagement'){ const en = await Store.get('engagements', ev.payload.engagement.id); if (en){ en.sentAt = nowIso(); await Store.put('engagements', en); } }
+      } catch(e){
+        ev.tries++; ev.lastError = String(e.message || e); ev.lastTry = nowIso();
+        await Store.put('outbox', ev);
+        break;
+      }
+    }
+  } finally {
+    flushing = false;
+    refreshChrome();
+    if (sent) { await fetchEtat(); rerenderSoft(); }
+  }
+}
+async function fetchEtat(){
+  const s = await getSettings();
+  if (!s.relayUrl || !s.token || !navigator.onLine) return;
+  try {
+    const j = await relay({ kind:'etat' });
+    const remote = j.etat || { engagements:[], periodic:{}, handover:null }, local = (await getEtat()).data;
+    // Fusion : on garde la date la plus récente (un envoi local peut encore être en attente)
+    const periodic = Object.assign({}, remote.periodic || {});
+    Object.entries(local.periodic || {}).forEach(([k, v]) => { if (!periodic[k] || String(periodic[k].at) < String(v.at)) periodic[k] = v; });
+    const handover = [remote.handover, local.handover].filter(Boolean).sort((a, b) => String(b.at).localeCompare(String(a.at)))[0] || null;
+    await Store.put('meta', { at: nowIso(), data: { engagements: remote.engagements || [], periodic, handover } }, 'etat');
+  } catch(e){ /* hors ligne ou relais indisponible : on garde la copie locale */ }
+}
+window.addEventListener('online', () => { refreshChrome(); flushOutbox(); fetchEtat().then(rerenderSoft); });
+window.addEventListener('offline', refreshChrome);
+function refreshChrome(){ $('#net').hidden = navigator.onLine; }
+function rerenderSoft(){ if (['home','clean','plus','settings','hist'].includes(route.name) && !$('#sheet').innerHTML && !document.activeElement.matches('input,textarea')) render(true); }
+
+/* ============================================================
+   Engagements (charte signée)
+   ============================================================ */
+async function engagementOf(name){
+  const n = normName(name), etat = await getEtat();
+  const local = (await Store.all('engagements')).filter(e => normName(e.name) === n);
+  const remote = (etat.data.engagements || []).filter(e => normName(e.name) === n);
+  const all = local.map(e => ({ at:e.at, version:e.version })).concat(remote.map(e => ({ at:e.at, version:e.version })));
+  const last = all.sort((a, b) => String(b.at).localeCompare(String(a.at)))[0];
+  if (!last) return { ok:false, reason:'jamais' };
+  const age = daysBetween(last.at, nowIso());
+  if (last.version !== CHARTE_VERSION) return { ok:false, reason:'version', at:last.at };
+  if (age > 365) return { ok:false, reason:'expire', at:last.at };
+  return { ok:true, at:last.at };
+}
+async function staffNames(){
+  const s = await getSettings(), etat = await getEtat(), loc = await Store.all('engagements');
+  const map = new Map();
+  [...s.names, ...(etat.data.engagements || []).map(e => e.name), ...loc.map(e => e.name)].forEach(n => { if (n && !map.has(normName(n))) map.set(normName(n), n.trim()); });
+  return [...map.values()].sort((a, b) => a.localeCompare(b, 'fr'));
+}
+async function rememberName(name){
+  const s = await getSettings();
+  if (!s.names.some(n => normName(n) === normName(name))) { s.names.push(name.trim()); await saveSettings(s); }
+}
+
+/* ============================================================
+   Routeur
+   ============================================================ */
+let route = { name:'home', args:[] };
+function parseHash(){
+  const h = location.hash.replace(/^#\/?/, '');
+  const [name, ...args] = h.split('/').map(decodeURIComponent);
+  return { name: name || 'home', args };
+}
+const TAB_OF = { home:'home', phase:'home', clean:'clean', fiche:'clean', allerg:'allerg', memo:'memo', plus:'plus', charte:'plus', hist:'plus', settings:'plus', engage:'plus', config:'plus' };
+async function render(keepScroll){
+  route = parseHash();
+  const y = window.scrollY;
+  $$('.tabs a').forEach(a => a.classList.toggle('on', a.dataset.tab === TAB_OF[route.name]));
+  const views = { home:viewHome, phase:viewPhase, clean:viewClean, fiche:viewFiche, allerg:viewAllerg, memo:viewMemo, plus:viewPlus, charte:viewCharte, hist:viewHist, settings:viewSettings, engage:viewEngagements, config:viewConfig };
+  await (views[route.name] || viewHome)();
+  window.scrollTo(0, keepScroll ? y : 0);
+}
+window.addEventListener('hashchange', () => { closeSheet(); render(); });
+const go = h => { if (location.hash === h) render(); else location.hash = h; };
+
+/* ---------- Bandeaux communs ---------- */
+async function banners(){
+  const [s, ob] = await Promise.all([getSettings(), Store.all('outbox')]);
+  let h = '';
+  if (!s.relayUrl || !s.token) h += `<div class="banner info"><span><b>GSM pas encore relié au registre.</b><br>Les données restent sur ce GSM. Ouvrez le lien de configuration reçu par mail, ou scannez le QR d'un GSM déjà configuré.</span><a class="btn small ghost" href="#/settings">Réglages</a></div>`;
+  if (ob.length){
+    const last = ob.map(o => o.lastError).filter(Boolean).pop();
+    h += `<div class="banner ${last ? 'bad' : 'warn'}"><span><b>${ob.length} envoi(s) en attente</b>${!navigator.onLine ? '<br>Hors ligne : envoi automatique au retour du réseau.' : last ? '<br><span class="small">Dernière erreur : ' + esc(last) + '</span>' : ''}</span>
+      ${navigator.onLine && s.relayUrl ? '<button class="btn small ghost" data-retry>Renvoyer</button>' : ''}</div>`;
+  }
+  if (s.thermoCalib && daysBetween(s.thermoCalib, nowIso()) > 365) h += `<div class="banner warn"><span><b>Thermomètre à contrôler</b> : dernier étalonnage le ${ymdFr(s.thermoCalib)} (plus de 12 mois).</span><a class="btn small ghost" href="#/memo/thermo">Comment</a></div>`;
+  return h;
+}
+function wireBanners(){ const b = $('[data-retry]'); if (b) b.onclick = () => { toast('Envoi en cours…'); flushOutbox(); }; }
+
+/* ============================================================
+   Écran SERVICE (accueil)
+   ============================================================ */
+let pick = { name:'', reserved:null };
+async function viewHome(){
+  await loadOpenService();
+  const st = await getSettings(), etat = await getEtat();
+  if (!S) return viewStart(st, etat);
+  const stale = S.date !== ymd();
+  const stats = PHASES.map(p => ({ p, s: phaseStatus(p, st) }));
+  const doneN = stats.filter(x => isDone(x.s.state)).length;
+  const rounds = st.rounds, now = nowHM();
+  // « Maintenant » : relevé du buffet à l'heure, sinon première étape non faite
+  let next = null;
+  ['r1','r2','r3'].forEach((r, i) => {
+    if (next) return;
+    const objs = st.chaud.concat(st.froid);
+    const done = objs.every(o => getTemp(r, o));
+    if (!done && now >= addMin(rounds[i], -10) && (i === 2 || now < rounds[i + 1])) next = { t:`Températures du buffet — ${rounds[i]}`, h:'#/phase/buffet', l: now > addMin(rounds[i], 20) ? 'En retard' : 'C\'est l\'heure' };
+  });
+  if (!next){ const f = stats.find(x => !isDone(x.s.state) && x.p.k !== 'buffet'); if (f) next = { t:f.p.t, h:'#/phase/' + f.p.k, l:'À faire maintenant' }; }
+  const openEcarts = S.ecarts.filter(e => !e.closed).length;
+  V.innerHTML = await banners() + (stale ? `<div class="banner bad"><span><b>Service du ${ymdFr(S.date)} non clôturé.</b><br>Clôturez-le avant d'en commencer un nouveau.</span><a class="btn small ghost" href="#/phase/cloture">Clôturer</a></div>` : '') + `
+    <div class="card">
+      <div class="svc-head"><div><div class="t">${esc(longDate(S.startedAt))}</div><div class="muted">${esc(S.operator)} · ${S.reserved ?? '—'} PDJ réservés · depuis ${fmtH(S.startedAt)}</div></div>
+      <span class="pill ${openEcarts ? 'p-bad' : 'p-ok'}">${openEcarts ? openEcarts + ' écart(s)' : 'Aucun écart'}</span></div>
+      <button class="btn small ghost" style="margin-top:8px" data-handoff>👤 Passer la main</button>
+      <div class="bar"><i style="width:${Math.round(doneN / PHASES.length * 100)}%"></i></div>
+      <div class="small muted" style="margin-top:4px">${doneN} étape(s) sur ${PHASES.length}</div>
+    </div>
+    ${next ? `<div class="card now"><div class="l">${esc(next.l)}</div><div class="t">${esc(next.t)}</div><a class="btn block" href="${next.h}">Ouvrir</a></div>` : ''}
+    <div class="phases">${stats.map(({ p, s }) => {
+      let st2 = s.state;
+      if (p.k === 'buffet' && !isDone(st2)){ const lateR = ['r1','r2','r3'].some((r, i) => now > addMin(rounds[i], 20) && !st.chaud.concat(st.froid).every(o => getTemp(r, o))); if (lateR) st2 = 'late'; }
+      return `<a class="ph" href="#/phase/${p.k}"><span class="ic">${p.ic}</span><span><span class="t">${esc(p.t)}</span><br><span class="s">${esc(p.when)}${s.txt && p.type !== 'cloture' ? ' · ' + s.txt : ''}</span></span><span class="pill ${PILL[st2][0]}">${PILL[st2][1]}</span></a>`;
+    }).join('')}</div>
+    <button class="btn block danger" style="margin-top:16px" data-signal>⚠️ Signaler un problème</button>`;
+  wireBanners();
+  $('[data-signal]').onclick = () => openSignal();
+  $('[data-handoff]').onclick = () => openHandoff();
+}
+// Relève en cours de service (ex. la nuit fait les cuissons, le PDJ continue)
+async function openHandoff(){
+  const names = (await staffNames()).filter(n => normName(n) !== normName(S.operator));
+  $('#sheet').innerHTML = `<div class="sheet-bg"><div class="sheet"><div class="sheet-head"><h3 style="margin:0">Qui reprend le service ?</h3><button class="btn small ghost" data-close>✕</button></div>
+    <p class="small muted">Les étapes déjà faites restent au nom de ${esc(S.operator)}.</p>
+    ${names.length ? chips('ho', names, '') : ''}<input class="inp" id="hon" placeholder="Prénom Nom" style="margin-top:8px">
+    <div id="hoeng"></div><button class="btn block primary" style="margin-top:14px" id="hook">Reprendre le service</button></div></div>`;
+  const sh = $('#sheet');
+  $('[data-close]', sh).onclick = closeSheet;
+  bindChips(sh, 'ho', v => { $('#hon').value = v; });
+  $('#hook').onclick = async () => {
+    const name = $('#hon').value.trim();
+    if (name.split(/\s+/).length < 2) return toast('Prénom et nom', true);
+    const eng = await engagementOf(name);
+    if (!eng.ok){ $('#hoeng').innerHTML = `<div class="rule bad">${esc(name)} doit d'abord signer l'engagement hygiène.</div><a class="btn block ghost" href="#/charte">📝 Lire et signer</a>`; pick.name = name; return; }
+    S.team = (S.team || [{ name:S.operator, at:S.startedAt }]).concat({ name, at:nowIso() });
+    S.operator = name; await rememberName(name); await saveS();
+    closeSheet(); toast(`${name} reprend le service`); render(true);
+  };
+}
+function addMin(hm, m){ const [h, mi] = hm.split(':').map(Number); const t = h * 60 + mi + m; return String(Math.floor(t / 60)).padStart(2, '0') + ':' + String(t % 60).padStart(2, '0'); }
+
+async function viewStart(st, etat){
+  const names = await staffNames();
+  if (pick.name && !names.some(n => normName(n) === normName(pick.name))) names.push(pick.name);
+  const eng = pick.name ? await engagementOf(pick.name) : null;
+  const ho = etat.data.handover;
+  const due = PERIODIC.map(p => Object.assign({ p }, periodicInfo(p, etat, ymd()))).filter(x => x.due);
+  V.innerHTML = await banners() + `
+    <h2>Bonjour 👋</h2><p class="hint">${esc(longDate())} — ouverture du petit-déjeuner.</p>
+    <div class="card">
+      <h3>Qui fait le petit-déjeuner ?</h3>
+      ${names.length ? chips('who', names, pick.name) : '<p class="muted small">Premier lancement : tapez votre prénom et votre nom.</p>'}
+      <label class="f">${names.length ? 'Pas dans la liste ?' : 'Prénom et nom'}</label>
+      <div class="row"><input class="inp" id="newname" placeholder="Prénom Nom" autocomplete="off" style="flex:1 1 200px"><button class="btn small ghost" id="addname">OK</button></div>
+      ${pick.name ? (eng.ok
+        ? `<div class="rule ok">✓ <b>${esc(pick.name)}</b> — engagement hygiène signé le ${fmtD(eng.at)}.</div>`
+        : `<div class="rule bad"><b>Avant de commencer :</b> ${eng.reason === 'jamais' ? 'lire et signer l\'engagement hygiène et sécurité alimentaire (3 minutes).' : eng.reason === 'version' ? 'la charte a été mise à jour, merci de la relire et de la signer.' : 'votre engagement a plus d\'un an, merci de le renouveler.'}</div>
+           <a class="btn block primary" href="#/charte">📝 Lire et signer l'engagement</a>`) : ''}
+    </div>
+    <div class="card">
+      <h3>PDJ réservés aujourd'hui</h3>
+      ${stepper('reserved', pick.reserved ?? '', 1)}
+      <p class="small muted" style="margin:8px 0 0">Selon la liste PDJ du jour (Opera). Sert au calcul des cuissons.</p>
+    </div>
+    <button class="btn hero primary" id="start" ${pick.name && eng && eng.ok && pick.reserved !== null ? '' : 'disabled'}>☕ Commencer le service</button>
+    ${ho ? `<div class="card" style="margin-top:14px"><h3>📨 Passation du service précédent</h3>
+      <p class="small muted" style="margin:0 0 6px">${esc(ho.by || '')} · ${fmt(ho.at)}</p>
+      ${ho.note ? `<p style="margin:0 0 8px">${esc(ho.note)}</p>` : ''}
+      ${ho.missing && ho.missing.length ? `<p class="small"><b>Manquants signalés :</b> ${esc(ho.missing.join(', '))}</p>` : ''}
+      ${ho.ecarts && ho.ecarts.length ? `<div class="rule bad"><b>Écarts du service précédent :</b><ul class="tight">${ho.ecarts.map(e => `<li>${esc(e)}</li>`).join('')}</ul></div>` : ''}
+      ${ho.nonFait && ho.nonFait.length ? `<p class="small"><b>Non fait :</b> ${esc(ho.nonFait.join(' ; '))}</p>` : ''}</div>` : ''}
+    ${due.length ? `<div class="card"><h3>🧽 Nettoyages périodiques à prévoir</h3><ul class="tight">${due.map(x => `<li>${esc(x.p.t)} ${x.late ? '<span class="pill p-late">En retard</span>' : ''}</li>`).join('')}</ul><p class="small muted">À cocher pendant la phase « Nettoyage ».</p></div>` : ''}`;
+  wireBanners();
+  bindChips(V, 'who', v => { pick.name = v; render(true); });
+  const add = () => { const v = $('#newname').value.trim(); if (v.split(/\s+/).length < 2) return toast('Prénom et nom, s\'il vous plaît', true); pick.name = v; render(true); };
+  $('#addname').onclick = add; $('#newname').onkeydown = e => { if (e.key === 'Enter') add(); };
+  bindSteppers(V, (k, v) => { pick.reserved = v; $('#start').disabled = !(pick.name && eng && eng.ok && v !== null); });
+  $('#start').onclick = async () => {
+    await rememberName(pick.name);
+    S = newService(pick.name, pick.reserved);
+    await saveS();
+    pick = { name:'', reserved:null };
+    toast('Service commencé — bon service !');
+    go('#/phase/poste');
+  };
+}
+
+/* ============================================================
+   Écran d'une PHASE
+   ============================================================ */
+async function viewPhase(){
+  await loadOpenService();
+  if (!S) return go('#/');
+  const p = PHASE[route.args[0]]; if (!p) return go('#/');
+  const st = await getSettings(), etat = await getEtat();
+  const i = PHASES.indexOf(p), nextP = PHASES[i + 1];
+  let body = '';
+  if (p.type === 'checks') body = checksHtml(p);
+  if (p.type === 'enceintes') body = enceintesHtml(p, st);
+  if (p.type === 'buffet') body = buffetHtml(st);
+  if (p.type === 'cuisson') body = cuissonHtml(p, await staffNames());
+  if (p.type === 'nettoyage') body = nettoyageHtml(p, etat);
+  if (p.type === 'dlc') body = dlcHtml(p);
+  if (p.type === 'debarras') body = checksHtml(p) + surplusHtml();
+  if (p.type === 'cloture') return viewCloture(st, etat);
+  V.innerHTML = `<a href="#/" class="small muted">← Service</a>
+    <h2>${p.ic} ${esc(p.t)}</h2><p class="hint">${esc(p.when)}</p>${body}
+    <div class="nav-btns"><a class="btn ghost" href="#/">Service</a>${nextP ? `<a class="btn primary" href="#/phase/${nextP.k}">Suivant : ${esc(nextP.t.split(' — ')[0])} →</a>` : ''}</div>
+    <p class="small muted" style="text-align:center;margin-top:14px">📱 Après avoir touché ce GSM : mains lavées avant de toucher un aliment.</p>`;
+  wireChecks(p);
+  wireTemps(st);
+  if (p.type === 'cuisson') wireCuisson();
+  if (p.type === 'nettoyage') wireNettoyage();
+  if (p.type === 'dlc') wireDlc();
+  if (p.type === 'debarras') wireSurplus();
+}
+
+/* ---------- Surplus NON exposés aux clients (AFSCA : 24–48 h, ≤ 7 °C, réchauffé ≥ 60 °C une seule fois) ---------- */
+const SURPLUS_TYPES = { froid:'Préparation froide (charcuterie, fromage, fruits coupés)', pain:'Pain / viennoiserie', cuit:'Plat cuit (œufs, lardons…)' };
+const SURPLUS_DEST = ['Frigo cuisine', 'Frigo du personnel', 'Cantine du personnel'];
+function surplusUntil(type, at){ const d = new Date(at); d.setHours(d.getHours() + REF.surplus[type]); return d.toISOString(); }
+function surplusHtml(){
+  const L = S.surplus || [];
+  return `<div class="sec">Surplus jamais sortis au buffet</div>
+    <div class="rule info">Seul ce qui n'a <b>jamais été exposé aux clients</b> peut être gardé : au frigo (≤ 7 °C) dans les 2 h, étiqueté, ${REF.surplus.froid} h maximum (préparations froides, pain) ou ${REF.surplus.cuit} h (plats cuits refroidis sous 10 °C en moins de 2 h), réchauffé à 60 °C minimum une seule fois.</div>
+    ${L.length ? L.map((x, i) => `<div class="trow"><div class="n"><span>${esc(x.q ? x.q + ' × ' : '')}${esc(x.p)}</span><button class="btn small ghost" data-sdel="${i}">✕</button></div>
+      <div class="tmeta">${esc(SURPLUS_TYPES[x.type])} · ${esc(x.dest)}</div>
+      <div class="label-prev"><b>${esc(x.p)}</b> — surplus non exposé<br>Préparé / rangé le : ${fmt(x.at)}<br>À utiliser avant : <b>${fmt(x.until)}</b>${x.type === 'cuit' ? '<br>Réchauffer à 60 °C minimum, une seule fois' : ''}<br>Initiales : ${esc(initials(x.by))}</div></div>`).join('') : '<p class="muted small">Aucun surplus gardé.</p>'}
+    <div class="card" style="margin-top:8px"><h3>Ajouter un surplus</h3>
+      <div class="row"><input class="inp" id="sp" placeholder="Produit" style="flex:3 1 170px"><input class="inp" id="sq" placeholder="Qté" style="flex:1 1 70px"></div>
+      <label class="f">Type</label>${chips('stype', Object.values(SURPLUS_TYPES), '')}
+      <label class="f">Rangé où</label>${chips('sdest', SURPLUS_DEST, '')}
+      <label style="display:flex;gap:10px;align-items:flex-start;margin-top:12px"><input type="checkbox" id="snexp" style="width:26px;height:26px;flex:0 0 auto"> <span><b>Jamais sorti au buffet</b> (pas exposé aux clients)</span></label>
+      <label style="display:flex;gap:10px;align-items:flex-start;margin-top:8px" id="scoolw" hidden><input type="checkbox" id="scool" style="width:26px;height:26px;flex:0 0 auto"> <span><b>Refroidi sous 10 °C en moins de 2 h</b> après cuisson</span></label>
+      <button class="btn block primary" id="sadd" style="margin-top:12px">Ajouter et afficher l'étiquette</button></div>`;
+}
+function wireSurplus(){
+  let type = '', dest = '';
+  const keyOf = lab => Object.keys(SURPLUS_TYPES).find(k => SURPLUS_TYPES[k] === lab);
+  bindChips(V, 'stype', v => { type = keyOf(v); $('#scoolw').hidden = type !== 'cuit'; });
+  bindChips(V, 'sdest', v => { dest = v; });
+  $$('[data-sdel]').forEach(b => b.onclick = async () => { S.surplus.splice(+b.dataset.sdel, 1); await saveS(); render(true); });
+  $('#sadd').onclick = async () => {
+    const p = $('#sp').value.trim();
+    if (!p || !type || !dest) return toast('Produit, type et rangement', true);
+    if (!$('#snexp').checked) return toast('Produit exposé aux clients : il doit être jeté, pas gardé', true);
+    if (type === 'cuit' && !$('#scool').checked) return toast('Pas refroidi sous 10 °C en 2 h : à jeter', true);
+    const at = nowIso();
+    S.surplus = (S.surplus || []).concat({ p, q:$('#sq').value.trim(), type, dest, at, until:surplusUntil(type, at), by:S.operator });
+    await saveS(); toast('Surplus enregistré — écrivez l\'étiquette'); render(true);
+  };
+}
+function checkItem(p, it){
+  const k = p.k + '.' + it[0], c = S.checks[k];
+  const help = p.type === 'nettoyage' ? '' : it[2];
+  const link = p.type === 'nettoyage' && it[2] ? `<a class="small" href="#/fiche/${it[2]}" onclick="event.stopPropagation()">Comment faire ›</a>` : '';
+  return `<div><button type="button" class="ck${c ? ' on' : ''}" data-ck="${k}"><span class="box">${c ? '✓' : ''}</span>
+    <span><b>${esc(it[1])}</b>${help ? `<span class="h">${esc(help)}</span>` : ''}${c ? `<span class="who">${esc(initials(c.by))} · ${fmtH(c.at)}</span>` : ''}</span></button>${link ? `<div style="text-align:right;margin-top:2px">${link}</div>` : ''}</div>`;
+}
+const checksHtml = p => `<div class="checks">${p.items.map(it => checkItem(p, it)).join('')}</div>`;
+function wireChecks(){
+  $$('[data-ck]').forEach(b => b.onclick = async () => {
+    const k = b.dataset.ck;
+    if (S.checks[k]) delete S.checks[k]; else S.checks[k] = { at: nowIso(), by: S.operator };
+    await saveS(); render(true);
+  });
+}
+
+/* ---------- Températures : saisie ---------- */
+function tempRow(ctx, obj, kind, ctxLabel, lim){
+  const t = getTemp(ctx, obj);
+  const id = esc(tempKey(ctx, obj));
+  if (t){
+    const re = t.re ? `<div class="tmeta">Re-mesure ${fmtH(t.re.at)} : <b>${fmtT(t.re.v)}</b> ${verdictTag(t.re)}</div>` : '';
+    const needRe = t.mustRemeasure && !t.re;
+    return `<div class="trow"><div class="n"><span>${esc(obj)}</span>${verdictTag(t)}</div>
+      <div><span class="tval">${fmtT(t.v)}</span> <span class="tmeta">· ${fmtH(t.at)} · ${esc(initials(t.by))}</span></div>
+      ${t.action ? `<div class="tmeta">Action : ${esc(t.action)}</div>` : ''}${t.msg ? `<div class="tmeta">${esc(t.msg)}</div>` : ''}${re}
+      <div class="row" style="margin-top:6px">${t.cls !== 'ok' || needRe ? `<button class="btn small ${needRe ? 'primary' : 'ghost'}" data-re="${id}" data-kind="${kind}">Re-mesurer</button>` : ''}
+      <button class="btn small ghost" data-fix="${id}" data-kind="${kind}">Corriger</button></div></div>`;
+  }
+  return `<div class="trow" data-trow="${id}"><div class="n"><span>${esc(obj)}${lim !== undefined && lim !== null && lim !== '' ? ` <span class="small muted">(limite ≤ ${fmtT(lim)})</span>` : ''}</span><span class="pill p-todo">À relever</span></div>
+    <div class="tin"><button type="button" class="sign" data-sign aria-label="Changer le signe">±</button>
+      <input class="inp" inputmode="decimal" placeholder="mesure" aria-label="Température ${esc(obj)}">
+      <span>°C</span><button class="btn small primary" data-tok="${id}" data-kind="${kind}" data-ctxl="${esc(ctxLabel)}" data-lim="${lim ?? ''}">OK</button></div></div>`;
+}
+function enceintesHtml(p, st){
+  return `<div class="rule info">🌡️ Thermomètre à sonde glissé entre deux produits, <b>pas l'afficheur du frigo</b>. Désinfectez la sonde après usage.<br>
+    Frigos : limite légale <b>≤ 7 °C</b> · cible interne ≤ 4 °C.<br>Congélateurs : <b>≤ −18 °C</b> (remontée tolérée jusqu'à −15 °C).</div>
+    ${st.enceintes.map(e => tempRow(p.ctx, e.n, e.t, p.ctx === 'open' ? 'Frigos ouverture' : 'Frigos fin de service', e.max)).join('')}`;
+}
+function buffetHtml(st){
+  const labels = ['Ouverture du buffet', 'Milieu de service', 'Fin — avant de débarrasser'];
+  return `<div class="rule info">Buffet chaud : limite légale <b>≥ 60 °C à cœur</b> · cible interne ≥ 65 °C.<br>Buffet froid : limite légale <b>≤ 7 °C</b> · cible interne ≤ 5 °C.<br>Sonde au cœur du produit, désinfectée entre deux produits.</div>` +
+    ['r1','r2','r3'].map((r, i) => {
+      const all = st.chaud.concat(st.froid), done = all.filter(o => getTemp(r, o)).length;
+      return `<div class="round-h"><b>${st.rounds[i]} · ${labels[i]}</b><span class="pill ${done === all.length ? 'p-ok' : nowHM() > addMin(st.rounds[i], 20) ? 'p-late' : 'p-todo'}">${done}/${all.length}</span></div>
+      <div class="sec" style="margin-top:4px">Chaud</div>${st.chaud.map(o => tempRow(r, o, 'chaud', 'Buffet ' + st.rounds[i])).join('')}
+      <div class="sec">Froid</div>${st.froid.map(o => tempRow(r, o, 'froid', 'Buffet ' + st.rounds[i])).join('')}`;
+    }).join('');
+}
+function wireTemps(){
+  $$('[data-sign]').forEach(b => b.onclick = () => { const i = b.parentElement.querySelector('input'); const v = i.value.trim(); i.value = v.startsWith('-') || v.startsWith('−') ? v.slice(1) : '-' + v; i.focus(); });
+  $$('[data-tok]').forEach(b => b.onclick = () => {
+    const inp = b.parentElement.querySelector('input'), v = toNum(inp.value);
+    if (v === null) return toast('Tapez la température mesurée', true);
+    const [ctx, ...rest] = b.dataset.tok.split('|');
+    recordTemp(ctx, rest.join('|'), b.dataset.kind, v, b.dataset.ctxl, null, toNum(b.dataset.lim));
+  });
+  $$('[data-re]').forEach(b => b.onclick = () => openRemeasure(b.dataset.re, b.dataset.kind));
+  $$('[data-fix]').forEach(b => b.onclick = () => openFix(b.dataset.fix, b.dataset.kind));
+}
+async function recordTemp(ctx, obj, kind, v, ctxLabel, hist, lim){
+  const [lo, hi] = PLAUSIBLE[kind];
+  if ((v < lo || v > hi) && !confirm(`${fmtT(v)} pour « ${obj} » : valeur inhabituelle. Confirmez-vous cette mesure ?`)) return false;
+  const ev = evalT(kind, v, lim);
+  const t = { lim, key:tempKey(ctx, obj), ctx, ctxLabel, obj, kind, v, at:nowIso(), by:S.operator, verdict:ev.verdict, cls:ev.cls, msg:ev.msg || '', ref:REF.version, mustRemeasure:!!ev.mustRemeasure };
+  if (hist) t.hist = hist;
+  const put = () => { S.temps = S.temps.filter(x => x.key !== t.key); S.temps.push(t); };
+  if (!ev.todo){ put(); await saveS(); toast(`${obj} : ${fmtT(v)} — ${ev.verdict}`); return render(true); }
+  openEcartSheet({ title:`${obj} : ${fmtT(v)}`, ev, onSave: async (action, cause, note, photo) => {
+    t.action = action; t.cause = cause; t.note = note;
+    put();
+    await addEcart({ ctx, cat:'Température', obj:`${obj} (${KIND_LABEL[kind]}, ${ctxLabel})`, val:fmtT(v), verdict:ev.verdict, action, cause, note, photo, critical:!!ev.critical });
+    render(true);
+  }});
+}
+function openEcartSheet({ title, ev, onSave }){
+  let action = ev.multi ? [] : '', cause = '', photo = null;
+  $('#sheet').innerHTML = `<div class="sheet-bg"><div class="sheet">
+    <div class="sheet-head"><h3 style="margin:0">${esc(title)}</h3>${verdictTag(ev)}</div>
+    <div class="rule ${ev.cls === 'bad' ? 'bad' : ''}"><b>Que faire maintenant :</b><ol class="tight" style="padding-left:20px">${ev.todo.map(x => `<li>${esc(x)}</li>`).join('')}</ol></div>
+    <label class="f">Action réalisée${ev.multi ? ' <span class="opt">(une ou plusieurs)</span>' : ''}</label>${chips('act', ev.actions, action, ev.multi)}
+    ${ev.causes && ev.causes.length ? `<label class="f">Cause <span class="opt">(si connue)</span></label>${chips('cause', ev.causes, cause)}` : ''}
+    <label class="f">Remarque <span class="opt">(facultatif)</span></label><textarea class="inp" id="enote" placeholder="Ce que vous avez constaté ou fait en plus"></textarea>
+    <button class="btn small ghost" id="ephoto" style="margin-top:10px">📷 Ajouter une photo <span class="muted">(facultatif)</span></button><div class="thumbs" id="ethumb"></div>
+    <div class="nav-btns"><button class="btn ghost" data-close>Annuler</button><button class="btn primary" id="esave" disabled>Enregistrer l'action</button></div>
+  </div></div>`;
+  const sh = $('#sheet');
+  bindChips(sh, 'act', v => { action = v; $('#esave').disabled = ev.multi ? !v.length : !v; });
+  bindChips(sh, 'cause', v => { cause = v; });
+  $('#ephoto').onclick = async () => { photo = await takePhoto(); if (photo) $('#ethumb').innerHTML = `<img src="${photo}" alt="Photo de l'écart">`; };
+  $('[data-close]', sh).onclick = closeSheet;
+  $('#esave').onclick = async () => {
+    const a = ev.multi ? action.join(' · ') : action, note = $('#enote').value.trim();
+    closeSheet();
+    await onSave(a, cause, note, photo);
+  };
+}
+function closeSheet(){ $('#sheet').innerHTML = ''; }
+async function addEcart(e){
+  const rec = Object.assign({ id:uid(), at:nowIso(), by:S.operator }, e);
+  S.ecarts.push(rec);
+  if (rec.critical || rec.direct){
+    rec.direct = true;
+    const att = rec.photo ? [{ name:`Ecart ${S.id} ${rec.id}.jpg`, mime:'image/jpeg', data:rec.photo.split(',')[1] }] : [];
+    await queue('ecart', { service:{ id:S.id, date:S.date, operator:S.operator }, ecart:Object.assign({}, rec, { photo: !!rec.photo }) }, att);
+    toast('Écart enregistré — responsable averti par mail');
+  } else toast('Écart enregistré');
+  await saveS();
+}
+function openRemeasure(key, kind){
+  const t = S.temps.find(x => x.key === key); if (!t) return;
+  $('#sheet').innerHTML = `<div class="sheet-bg"><div class="sheet"><div class="sheet-head"><h3 style="margin:0">Re-mesure : ${esc(t.obj)}</h3><button class="btn small ghost" data-close>✕</button></div>
+    <p class="muted">Première mesure : ${fmtT(t.v)} à ${fmtH(t.at)} (${esc(t.verdict)}).</p>
+    <div class="tin"><button type="button" class="sign" data-sign>±</button><input class="inp" inputmode="decimal" id="rev"><span>°C</span></div>
+    <button class="btn block primary" style="margin-top:14px" id="resave">Enregistrer la re-mesure</button></div></div>`;
+  const sh = $('#sheet');
+  $('[data-close]', sh).onclick = closeSheet;
+  $('[data-sign]', sh).onclick = () => { const i = $('#rev'); const v = i.value.trim(); i.value = v.startsWith('-') ? v.slice(1) : '-' + v; };
+  $('#resave').onclick = async () => {
+    const v = toNum($('#rev').value); if (v === null) return toast('Tapez la température', true);
+    const ev = evalT(kind, v, t.lim);
+    if (t.re) t.hist = (t.hist || []).concat([{ v:t.re.v, verdict:t.re.verdict, at:t.re.at, motif:'re-mesure précédente', by:t.re.by }]);
+    t.re = { v, at:nowIso(), verdict:ev.verdict, cls:ev.cls, by:S.operator };
+    closeSheet();
+    if (kind === 'chaud' && v < REF.chaud.legal){
+      t.re.verdict = 'Non conforme'; t.re.cls = 'bad';
+      await addEcart({ ctx:t.ctx, cat:'Température', obj:`${t.obj} (re-mesure)`, val:fmtT(v), verdict:'Non conforme', action:'Toujours sous 60 °C après réchauffage : jeté et remplacé par un bac neuf', critical:true });
+      toast('Toujours sous 60 °C : jetez et remettez un bac neuf', true);
+    } else if (ev.todo && ev.cls === 'bad'){
+      await addEcart({ ctx:t.ctx, cat:'Température', obj:`${t.obj} (re-mesure)`, val:fmtT(v), verdict:ev.verdict, action:'Toujours non conforme à la re-mesure — responsable à prévenir', critical:true });
+    } else { toast(`Re-mesure : ${fmtT(v)} — ${ev.verdict}`); }
+    await saveS(); render(true);
+  };
+}
+function openFix(key, kind){
+  const t = S.temps.find(x => x.key === key); if (!t) return;
+  $('#sheet').innerHTML = `<div class="sheet-bg"><div class="sheet"><div class="sheet-head"><h3 style="margin:0">Corriger une erreur de saisie</h3><button class="btn small ghost" data-close>✕</button></div>
+    <p class="muted">La valeur ${fmtT(t.v)} reste dans l'historique avec le motif de la correction.</p>
+    <div class="tin"><button type="button" class="sign" data-sign>±</button><input class="inp" inputmode="decimal" id="fixv"><span>°C</span></div>
+    <label class="f">Motif</label><input class="inp" id="fixm" placeholder="ex. faute de frappe (3,5 au lieu de 35)">
+    <button class="btn block primary" style="margin-top:14px" id="fixsave">Corriger</button></div></div>`;
+  const sh = $('#sheet');
+  $('[data-close]', sh).onclick = closeSheet;
+  $('[data-sign]', sh).onclick = () => { const i = $('#fixv'); const v = i.value.trim(); i.value = v.startsWith('-') ? v.slice(1) : '-' + v; };
+  $('#fixsave').onclick = async () => {
+    const v = toNum($('#fixv').value), m = $('#fixm').value.trim();
+    if (v === null || !m) return toast('Nouvelle valeur et motif obligatoires', true);
+    const hist = (t.hist || []).concat([{ v:t.v, verdict:t.verdict, at:t.at, fixedAt:nowIso(), motif:m, by:S.operator }]);
+    closeSheet();
+    await recordTemp(t.ctx, t.obj, kind, v, t.ctxLabel, hist, t.lim); // remplace la mesure seulement à l'enregistrement
+  };
+}
+
+/* ---------- Signaler un problème ---------- */
+function openSignal(){
+  let cat = '', photo = null;
+  $('#sheet').innerHTML = `<div class="sheet-bg"><div class="sheet"><div class="sheet-head"><h3 style="margin:0">⚠️ Signaler un problème</h3><button class="btn small ghost" data-close>✕</button></div>
+    <p class="muted small">Le responsable reçoit un mail immédiatement. Urgence vitale : 112. Centre antipoisons : 070 245 245.</p>
+    <label class="f">De quoi s'agit-il ?</label>${chips('cat', ECART_CATS, '')}
+    <label class="f">Quoi / où ?</label><input class="inp" id="sobj" placeholder="ex. frigo lait, yaourts, four, souris dans la réserve…">
+    <label class="f">Ce que j'ai constaté</label><textarea class="inp" id="scon"></textarea>
+    <label class="f">Ce que j'ai déjà fait</label><textarea class="inp" id="sact" placeholder="ex. produits isolés « NE PAS UTILISER », machine débranchée…"></textarea>
+    <button class="btn small ghost" id="sphoto" style="margin-top:10px">📷 Photo <span class="muted">(facultatif)</span></button><div class="thumbs" id="sthumb"></div>
+    <button class="btn block primary" style="margin-top:14px" id="ssave" disabled>Envoyer au responsable</button></div></div>`;
+  const sh = $('#sheet');
+  $('[data-close]', sh).onclick = closeSheet;
+  bindChips(sh, 'cat', v => { cat = v; $('#ssave').disabled = false; });
+  $('#sphoto').onclick = async () => { photo = await takePhoto(); if (photo) $('#sthumb').innerHTML = `<img src="${photo}" alt="Photo">`; };
+  $('#ssave').onclick = async () => {
+    const obj = $('#sobj').value.trim(), con = $('#scon').value.trim(), act = $('#sact').value.trim();
+    if (!con) return toast('Décrivez ce que vous avez constaté', true);
+    closeSheet();
+    await addEcart({ ctx:'signal', cat, obj, val:'', verdict:'Signalé', note:con, action:act || 'À traiter par le responsable', photo, direct:true });
+    render(true);
+  };
+}
+
+/* ---------- Cuissons ---------- */
+function cookQty(){
+  const pres = (S.weekend || S.holiday) ? COOK_QTY.presence.weekend : COOK_QTY.presence.semaine, n = S.reserved || 0;
+  return COOK_QTY.items.map(([p, r]) => [p, Math.ceil(n * pres * r)]);
+}
+function cuissonHtml(p, names){
+  const q = cookQty();
+  return `<div class="card"><h3>Quantités à cuire</h3>
+      <p class="small muted" style="margin-top:-6px">${S.reserved} PDJ × ${fmtN((S.weekend || S.holiday) ? COOK_QTY.presence.weekend : COOK_QTY.presence.semaine)} (${S.weekend ? 'week-end' : S.holiday ? 'jour férié' : 'semaine'}) × ratio du produit — procédure cuissons.</p>
+      <label class="small" style="display:flex;gap:8px;align-items:center;margin-bottom:8px"><input type="checkbox" id="holiday" ${S.holiday ? 'checked' : ''} style="width:24px;height:24px"> Jour férié</label>
+      <table class="t"><tr><th>Produit</th><th>À cuire</th><th>Cuit</th></tr>
+      ${q.map(([n, v]) => `<tr><td>${esc(n)}</td><td><b>${v}</b></td><td>${stepper('cook:' + n, S.cook.qty[n] ?? '', 1, true)}</td></tr>`).join('')}</table>
+      <p class="small muted">Ne pas diminuer les quantités sans accord préalable.</p></div>
+    <div class="card"><h3>Déroulé</h3>
+      <dl class="kv"><dt>4h30</dt><dd>Mise en place viennoiseries et pains</dd><dt>4h45</dt><dd>Four à 185 °C (préchauffe 15-20 min) · haut : viennoiseries · bas : pains</dd>
+      <dt>≈ 5h00</dt><dd>Enfourner, puis refroidir 10 min dans l'office</dd><dt>≈ 6h00</dt><dd>Mise en place du buffet · froid au dernier moment</dd><dt>≈ 6h30</dt><dd>Cuiseur à œufs (90°, 70° si bulles) · smoothie au blender, 1–2 L sur la plaque froide</dd></dl></div>
+    <div class="card"><h3>Temps de cuisson</h3><table class="t"><tr><th>Produit</th><th>Temps</th><th>Réglage</th></tr>
+      ${COOK.map(c => `<tr><td>${esc(c[0])}${c[3] ? `<br><span class="small muted">${esc(c[3])}</span>` : ''}</td><td><b>${esc(c[1])}</b></td><td class="small">${esc(c[2])}</td></tr>`).join('')}</table></div>
+    <label class="f">Cuisson réalisée par</label>${chips('cookby', names.length ? names : [S.operator], S.cook.by)}
+    <div class="sec">Contrôles</div>${checksHtml(p)}`;
+}
+function wireCuisson(){
+  bindChips(V, 'cookby', async v => { S.cook.by = v; await saveS(); });
+  bindSteppers(V, async (k, v) => { S.cook.qty[k.slice(5)] = v; await saveS(); });
+  $('#holiday').onchange = async e => { S.holiday = e.target.checked; await saveS(); render(true); };
+}
+
+/* ---------- Nettoyage de fin de service ---------- */
+function nettoyageHtml(p, etat){
+  const due = dueToday(etat);
+  const wd = weekday(S.startedAt);
+  const extra = (wd === 0 || wd === 6 || S.holiday) ? `<div class="rule">Week-end / jour férié : la <b>cour</b> est aussi à nettoyer.</div>` : '';
+  const lv = S.temps.find(t => t.ctx === 'lv');
+  return `<div class="rule info">Séquence : débarrasser → nettoyer → rincer → désinfecter (temps de contact) → rincer → sécher. <a href="#/clean">Aide-mémoire nettoyage ›</a></div>${extra}
+    ${checksHtml(p)}
+    <div class="sec">Nettoyages périodiques du jour</div>
+    ${due.length ? due.map(x => {
+      const done = S.periodic[x.p.k];
+      return `<div><button type="button" class="ck${done ? ' on' : ''}" data-per="${x.p.k}"><span class="box">${done ? '✓' : ''}</span>
+        <span><b>${esc(x.p.t)}</b><span class="h">${esc(FREQ[x.p.f].l)}${x.p.day !== undefined ? ' · le ' + DAYS[x.p.day] : ''} · dernier : ${x.last ? fmtD(x.last) : 'jamais enregistré'}${x.late ? ' · EN RETARD' : ''}</span>${done ? `<span class="who">${esc(initials(done.by))} · ${fmtH(done.at)}</span>` : ''}</span></button>
+        <div style="text-align:right;margin-top:2px"><a class="small" href="#/fiche/${x.p.fiche}">Comment faire ›</a></div>
+        ${x.p.temp ? `<div style="margin-top:6px">${tempRow('lv', 'Lave-vaisselle (rinçage)', 'lv', 'Contrôle hebdomadaire')}</div>` : ''}</div>`;
+    }).join('') : '<p class="muted">Aucun nettoyage périodique dû aujourd\'hui.</p>'}
+    <p class="small"><a href="#/clean">Voir tout le planning périodique ›</a></p>`;
+}
+function wireNettoyage(){
+  $$('[data-per]').forEach(b => b.onclick = async () => {
+    const k = b.dataset.per;
+    if (S.periodic[k]) delete S.periodic[k]; else S.periodic[k] = { at:nowIso(), by:S.operator };
+    await saveS(); render(true);
+  });
+}
+
+/* ---------- Dates, stocks, manquants ---------- */
+function dlcHtml(p){
+  const wd = weekday(S.startedAt);
+  const inv = [1, 3, 4].includes(wd);
+  return `<div class="rule info">Produit ouvert sans indication : <b>${REF.ouverture_jours} jours</b> maximum, jamais au-delà de la date d'origine. <a href="#/memo/dlc">Calculer une date ›</a></div>
+    ${checksHtml(p)}
+    ${inv ? `<div class="rule">Aujourd'hui (${DAYS[wd]}) : <b>inventaire du stock PDJ</b> à faire.</div>` : ''}
+    <div class="sec">Produits retirés (périmés, abîmés)</div>
+    ${S.retires.length ? `<table class="t">${S.retires.map((r, i) => `<tr><td>${esc(r.p)}</td><td>${esc(r.q)}</td><td class="small">${esc(r.m)}</td><td><button class="btn small ghost" data-rdel="${i}">✕</button></td></tr>`).join('')}</table>` : '<p class="muted small">Aucun produit retiré.</p>'}
+    <div class="row" style="margin-top:8px"><input class="inp" id="rp" placeholder="Produit" style="flex:2 1 160px"><input class="inp" id="rq" placeholder="Qté" style="flex:1 1 70px"></div>
+    ${chips('rm', ['Date dépassée','Pas d\'étiquette d\'ouverture','Abîmé / suspect'], '')}
+    <button class="btn small ghost" id="radd" style="margin-top:8px">+ Ajouter</button>
+    <div class="sec">Manquants à signaler</div>
+    ${chips('miss', MISSING, S.missing, true)}
+    <input class="inp" id="missother" style="margin-top:8px" placeholder="Autre manquant" value="${esc(S.missingOther)}">`;
+}
+function wireDlc(){
+  let rm = '';
+  bindChips(V, 'rm', v => { rm = v; });
+  $('#radd').onclick = async () => {
+    const p = $('#rp').value.trim(); if (!p) return toast('Nom du produit', true);
+    S.retires.push({ p, q:$('#rq').value.trim() || '1', m:rm || 'Date dépassée' }); await saveS(); render(true);
+  };
+  $$('[data-rdel]').forEach(b => b.onclick = async () => { S.retires.splice(+b.dataset.rdel, 1); await saveS(); render(true); });
+  bindChips(V, 'miss', async v => { S.missing = v; await saveS(); });
+  $('#missother').onchange = async e => { S.missingOther = e.target.value.trim(); await saveS(); };
+}
+
+/* ============================================================
+   CLÔTURE
+   ============================================================ */
+function nonFaits(st){
+  const out = [];
+  PHASES.forEach(p => {
+    if (p.items) p.items.forEach(it => { if (!S.checks[p.k + '.' + it[0]]) out.push(`${p.t} : ${it[1]}`); });
+    if (p.type === 'enceintes') st.enceintes.forEach(e => { if (!getTemp(p.ctx, e.n)) out.push(`Température non relevée : ${e.n} (${p.ctx === 'open' ? 'ouverture' : 'fin'})`); });
+    if (p.type === 'buffet') ['r1','r2','r3'].forEach((r, i) => st.chaud.concat(st.froid).forEach(o => { if (!getTemp(r, o)) out.push(`Température non relevée : ${o} (${st.rounds[i]})`); }));
+  });
+  return out;
+}
+async function viewCloture(st, etat){
+  const c = S.counts, nf = nonFaits(st);
+  const dueNotDone = dueToday(etat).filter(x => !S.periodic[x.p.k]);
+  const conso = (c.adultes || 0) + (c.enfants || 0) + (c.offerts || 0);
+  const diff = c.factures === undefined || c.factures === null ? null : conso - (c.offerts || 0) - c.factures;
+  V.innerHTML = `<a href="#/" class="small muted">← Service</a><h2>✍️ Clôture & passation</h2><p class="hint">Dernière étape : chiffres, pertes, passation, signature.</p>
+    <div class="card"><h3>Petits-déjeuners</h3>
+      <dl class="kv" style="margin-bottom:8px"><dt>Réservés</dt><dd>${S.reserved ?? '—'}</dd></dl>
+      <label class="f">Consommés — adultes</label>${stepper('adultes', c.adultes ?? '', 1)}
+      <label class="f">Consommés — enfants</label>${stepper('enfants', c.enfants ?? '', 1)}
+      <label class="f">Offerts</label>${stepper('offerts', c.offerts ?? '', 1)}
+      <label class="f">Facturés (PMS)</label>${stepper('factures', c.factures ?? '', 1)}
+      <label class="f">Annulations</label>${stepper('annulations', c.annulations ?? '', 1)}
+      <div class="rule ${diff ? 'bad' : 'info'}" id="diffbox">Total consommés : <b>${conso}</b>${diff !== null ? ` · différence consommés payants − facturés : <b>${diff}</b>` : ''}</div>
+      <label class="f">Explication de la différence <span class="opt">${diff ? '(obligatoire)' : '(si besoin)'}</span></label><textarea class="inp" id="expl">${esc(c.explication || '')}</textarea>
+    </div>
+    <div class="card"><h3>Pertes</h3><p class="small muted" style="margin-top:-6px">Ce qui a été jeté ou non consommé. Laisser vide = 0.</p>
+      ${LOSSES.map(([g, u, list]) => `<div class="sec">${g} (${u})</div><table class="t">${list.map(n => `<tr><td>${esc(n)}</td><td style="width:190px">${stepper('loss:' + n, S.losses[n] ?? '', u === 'L' ? 0.5 : 1, true)}</td></tr>`).join('')}</table>`).join('')}
+      ${S.retires.length ? `<p class="small">Produits retirés (dates) : ${esc(S.retires.map(r => r.q + ' × ' + r.p).join(', '))}</p>` : ''}
+    </div>
+    <div class="card"><h3>Écarts du service (${S.ecarts.length})</h3>
+      ${S.ecarts.length ? `<ul class="tight">${S.ecarts.map(e => `<li><b>${esc(e.obj || e.cat)}</b>${e.val ? ' ' + esc(e.val) : ''} — ${esc(e.action || '')}</li>`).join('')}</ul>` : '<p class="muted">Aucun écart enregistré.</p>'}</div>
+    ${nf.length || dueNotDone.length ? `<div class="card"><h3>Non réalisé (${nf.length + dueNotDone.length})</h3>
+      <ul class="tight small">${nf.concat(dueNotDone.map(x => 'Nettoyage périodique : ' + x.p.t)).map(x => `<li>${esc(x)}</li>`).join('')}</ul>
+      <p class="small muted">Un contrôle non fait n'est jamais « conforme » : il part tel quel dans le rapport.</p>
+      <label class="f">Pourquoi ? <span class="opt">(obligatoire)</span></label><textarea class="inp" id="nfm">${esc(S.nonFaitMotif)}</textarea></div>` : ''}
+    <div class="card"><h3>Passation</h3>
+      <label class="f">Message pour le prochain PDJ et la réception</label><textarea class="inp" id="handover" placeholder="ex. plus de lait soja, machine à jus bruyante, 2 groupes demain…">${esc(S.handover)}</textarea></div>
+    <div class="card"><h3>Signature</h3><p class="small muted" style="margin-top:-6px">${esc(S.operator)} — je certifie l'exactitude de ces relevés.</p>${signatureBlock()}</div>
+    <button class="btn hero ok" id="close">✅ Clôturer et envoyer le rapport</button>`;
+  const upd = async (k, v) => { S.counts[k] = v; await saveS(); const cc = S.counts; const co = (cc.adultes || 0) + (cc.enfants || 0) + (cc.offerts || 0);
+    const df = cc.factures === undefined || cc.factures === null ? null : co - (cc.offerts || 0) - cc.factures;
+    $('#diffbox').className = 'rule ' + (df ? 'bad' : 'info'); $('#diffbox').innerHTML = `Total consommés : <b>${co}</b>${df !== null ? ` · différence consommés payants − facturés : <b>${df}</b>` : ''}`; };
+  bindSteppers(V, async (k, v) => { if (k.startsWith('loss:')) { S.losses[k.slice(5)] = v; await saveS(); } else upd(k, v); });
+  $('#expl').onchange = async e => { S.counts.explication = e.target.value.trim(); await saveS(); };
+  $('#handover').onchange = async e => { S.handover = e.target.value.trim(); await saveS(); };
+  if ($('#nfm')) $('#nfm').onchange = async e => { S.nonFaitMotif = e.target.value.trim(); await saveS(); };
+  const sig = wireSignature(V);
+  $('#close').onclick = async () => {
+    S.counts.explication = $('#expl').value.trim(); S.handover = $('#handover').value.trim(); if ($('#nfm')) S.nonFaitMotif = $('#nfm').value.trim();
+    const cc = S.counts, co = (cc.adultes || 0) + (cc.enfants || 0) + (cc.offerts || 0);
+    if (cc.adultes === undefined || cc.adultes === null) return toast('Indiquez le nombre de PDJ consommés (adultes)', true);
+    if (cc.factures === undefined || cc.factures === null) return toast('Indiquez le nombre de PDJ facturés', true);
+    if (co - (cc.offerts || 0) - cc.factures !== 0 && !cc.explication) return toast('Expliquez la différence consommés / facturés', true);
+    if ((nf.length || dueNotDone.length) && !S.nonFaitMotif) return toast('Indiquez pourquoi certaines tâches n\'ont pas été faites', true);
+    if (sig.isEmpty()) return toast('Signature obligatoire', true);
+    if (!confirm('Clôturer le service ? Il ne sera plus modifiable.')) return;
+    S.signature = sig.toPng(); S.closedAt = nowIso();
+    const report = buildReport(st, etat, nf, dueNotDone);
+    S.report = report;
+    await saveS();
+    const att = [{ name:`${S.id} signature.png`, mime:'image/png', data:S.signature.split(',')[1] }];
+    S.ecarts.filter(e => e.photo && !e.direct).forEach(e => att.push({ name:`${S.id} ecart ${e.id}.jpg`, mime:'image/jpeg', data:e.photo.split(',')[1] }));
+    await queue('cloture', { report }, att);
+    // Copie locale immédiate de la passation et des nettoyages périodiques (le relais la confirmera)
+    const et = await getEtat(); et.data.periodic = et.data.periodic || {};
+    Object.entries(S.periodic).forEach(([k, v]) => { et.data.periodic[k] = v; });
+    et.data.handover = handoverOf(report);
+    await Store.put('meta', et, 'etat');
+    const done = S; S = null;
+    V.innerHTML = `<div class="card" style="text-align:center"><div style="font-size:60px">✅</div><h2>Service clôturé</h2>
+      <p>${esc(done.operator)} · ${fmt(done.closedAt)}</p><p class="muted">Le rapport part par mail et dans le registre${navigator.onLine ? '' : ' dès le retour du réseau'}.</p>
+      <a class="btn block primary" href="#/">Terminé</a></div>`;
+  };
+}
+// Même format que celui calculé par le relais (Code.gs → passation_)
+function handoverOf(r){
+  return { at:r.closedAt, by:r.operator, serviceId:r.id, note:r.handover, missing:r.missing,
+    ecarts:r.ecarts.slice(0, 8).map(e => `${e.obj || e.cat}${e.val ? ' ' + e.val : ''} — ${e.action || ''}`),
+    nonFait:r.nonFait.slice(0, 8) };
+}
+function buildReport(st, etat, nf, dueNotDone){
+  const c = S.counts, conso = (c.adultes || 0) + (c.enfants || 0) + (c.offerts || 0);
+  const checks = [];
+  PHASES.forEach(p => (p.items || []).forEach(it => { const k = p.k + '.' + it[0], v = S.checks[k]; checks.push({ phase:p.t, label:it[1], status:v ? 'Fait' : 'Non fait', at:v ? v.at : '', by:v ? v.by : '' }); }));
+  const periodic = dueToday(etat).map(x => ({ k:x.p.k, t:x.p.t, freq:FREQ[x.p.f].l, status:S.periodic[x.p.k] ? 'Fait' : 'Non fait', at:S.periodic[x.p.k] ? S.periodic[x.p.k].at : '', by:S.periodic[x.p.k] ? S.periodic[x.p.k].by : '' }));
+  const losses = [];
+  LOSSES.forEach(([g, u, list]) => list.forEach(n => { if (S.losses[n]) losses.push({ p:n, q:S.losses[n], u, m:'Non consommé' }); }));
+  S.retires.forEach(r => losses.push({ p:r.p, q:r.q, u:'', m:r.m }));
+  const temps = S.temps.map(t => ({ ctx:t.ctxLabel, obj:t.obj, kind:KIND_LABEL[t.kind], v:t.v, at:t.at, by:t.by, verdict:t.verdict, action:t.action || '', cause:t.cause || '', note:t.note || '',
+    re: t.re ? { v:t.re.v, at:t.re.at, verdict:t.re.verdict } : null, hist:t.hist || [], ref:t.ref }));
+  const ecarts = S.ecarts.map(e => ({ id:e.id, at:e.at, by:e.by, cat:e.cat, obj:e.obj, val:e.val, verdict:e.verdict, action:e.action, cause:e.cause || '', note:e.note || '', direct:!!e.direct, photo:!!e.photo }));
+  return { id:S.id, date:S.date, operator:S.operator, team:(S.team || []).map(t => t.name + ' (' + fmtH(t.at) + ')'), cookBy:S.cook.by, cookQty:S.cook.qty, startedAt:S.startedAt, closedAt:S.closedAt, reserved:S.reserved,
+    weekend:S.weekend, holiday:S.holiday,
+    counts:{ adultes:c.adultes || 0, enfants:c.enfants || 0, offerts:c.offerts || 0, total:conso, factures:c.factures, annulations:c.annulations || 0, diff: conso - (c.offerts || 0) - (c.factures || 0), explication:c.explication || '' },
+    temps, checks, periodic, losses, surplus:(S.surplus || []).map(x => ({ p:x.p, q:x.q, type:SURPLUS_TYPES[x.type], dest:x.dest, at:x.at, until:x.until, by:x.by })), missing:S.missing.concat(S.missingOther ? [S.missingOther] : []), handover:S.handover,
+    nonFait: nf.concat(dueNotDone.map(x => 'Nettoyage périodique : ' + x.p.t)), nonFaitMotif:S.nonFaitMotif, ecarts,
+    result: S.ecarts.length || nf.length ? 'Écarts' : 'Conforme', ref:REF.version, app:APP_VERSION };
+}
+
+/* ============================================================
+   NETTOYAGE (aide-mémoire + planning)
+   ============================================================ */
+async function viewClean(){
+  await loadOpenService();
+  const etat = await getEtat(), today = S ? S.date : ymd();
+  V.innerHTML = `<h2>🧽 Nettoyage</h2><p class="hint">Ce qu'il faut utiliser, dans quel ordre, et quand.</p>
+    <details class="acc" open><summary>La séquence — toujours dans cet ordre</summary><div><ol class="steps6">${SEQ6.map(s => `<li>${esc(s)}</li>`).join('')}</ol>
+      <div class="rule bad" style="margin-top:10px">Un désinfectant sur une surface sale ne désinfecte pas. Jamais mélanger un détartrant (acide) et un produit chloré. Jamais de produit sur une surface brûlante. Jamais de produit transvasé dans une bouteille alimentaire.</div></div></details>
+    <details class="acc"><summary>Quel produit pour quoi ?</summary><div>${Object.entries(FAM).map(([k, f]) => `<p><span class="fam ${k}">${esc(f.t)}</span>${f.ex ? ` <span class="small muted">${esc(f.ex)}</span>` : ''}<br><span class="small">${esc(f.why)}</span></p>`).join('')}
+      <p class="small muted">Toujours la dose et le temps de contact indiqués sur l'étiquette du produit utilisé. En cas de doute : ne pas utiliser, demander. Fiches de sécurité au local d'entretien.</p></div></details>
+    <details class="acc"><summary>Code couleur des lavettes</summary><div>
+      ${[['#1257A8','BLEU','Surfaces en contact avec les aliments, plans de travail, petit matériel'],['#2A7A34','VERT','Préparation froide, fruits et légumes'],['#D89B00','JAUNE','Surfaces générales, mobilier, poignées, salle PDJ'],['#B31E1E','ROUGE','Sanitaires, poubelles, siphons, local déchets — jamais ailleurs']].map(c => `<div class="col"><span class="sw" style="background:${c[0]}"></span><span><b>${c[1]}</b><br><span class="small">${c[2]}</span></span></div>`).join('')}
+      <p class="small muted">Une couleur = une zone. Le matériel ne change jamais de zone (PND-CUI-01, en cours de validation).</p></div></details>
+    <div class="sec">Fiches par équipement</div>
+    <input class="inp" id="fq" placeholder="Rechercher : café, frigo, four…" style="margin-bottom:8px">
+    <div class="items" id="flist">${FICHES.map(f => `<a class="item" href="#/fiche/${f.k}" data-q="${esc(normName(f.t + ' ' + f.zone))}"><span><span class="t">${esc(f.t)}</span><br><span class="s">${esc(f.freq)}</span></span><span>›</span></a>`).join('')}</div>
+    <div class="sec">Planning périodique</div>
+    <div class="items">${PERIODIC.map(p => { const i = periodicInfo(p, etat, today);
+      return `<div class="item"><span><span class="t">${esc(p.t)}</span><br><span class="s">${esc(FREQ[p.f].l)}${p.day !== undefined ? ' · le ' + DAYS[p.day] : ''} · dernier : ${i.last ? fmtD(i.last) : 'jamais'}</span></span>
+        <span>${i.late ? '<span class="pill p-late">En retard</span>' : i.due ? '<span class="pill p-run">À faire</span>' : '<span class="pill p-ok">OK</span>'}${S ? '' : `<br><button class="btn small ghost" style="margin-top:6px" data-done="${p.k}">Fait</button>`}</span></div>`; }).join('')}</div>
+    ${S ? '<p class="small muted">Pendant un service, cochez les nettoyages périodiques dans la phase « Nettoyage de fin de service ».</p>' : ''}
+    <details class="acc" style="margin-top:14px"><summary>Les 9 erreurs qui coûtent cher</summary><div><table class="t">${[
+      ['Désinfecter une surface sale','Nettoyer et rincer d\'abord'],['Essuyer le désinfectant tout de suite','Laisser agir le temps indiqué'],['Ne pas rincer après désinfection','Eau potable sur toute surface en contact avec un aliment'],
+      ['Oublier les joints de frigo','Brosse souple chaque semaine'],['Même lavette partout','Code couleur'],['Reposer un filtre de hotte humide','Sécher complètement'],
+      ['Balayer à sec','Balayage humide'],['Transvaser un produit dans une bouteille d\'eau','Emballage d\'origine ou spray étiqueté'],['Dégivrer au couteau ou à l\'eau bouillante','Dégivrage naturel ou bol d\'eau chaude']
+    ].map(r => `<tr><td>❌ ${esc(r[0])}</td><td>✅ ${esc(r[1])}</td></tr>`).join('')}</table></div></details>`;
+  $('#fq').oninput = e => { const q = normName(e.target.value); $$('#flist .item').forEach(a => a.hidden = q && !a.dataset.q.includes(q)); };
+  $$('[data-done]').forEach(b => b.onclick = () => markPeriodicStandalone(b.dataset.done));
+}
+async function markPeriodicStandalone(k){
+  const names = await staffNames();
+  let who = '';
+  $('#sheet').innerHTML = `<div class="sheet-bg"><div class="sheet"><div class="sheet-head"><h3 style="margin:0">${esc(PER[k].t)}</h3><button class="btn small ghost" data-close>✕</button></div>
+    <label class="f">Fait par</label>${names.length ? chips('pw', names, '') : ''}<input class="inp" id="pwn" placeholder="Prénom Nom" style="margin-top:8px">
+    <button class="btn block primary" style="margin-top:14px" id="pwok">Enregistrer</button></div></div>`;
+  const sh = $('#sheet');
+  $('[data-close]', sh).onclick = closeSheet;
+  bindChips(sh, 'pw', v => { who = v; $('#pwn').value = v; });
+  $('#pwok').onclick = async () => {
+    who = $('#pwn').value.trim(); if (!who) return toast('Qui l\'a fait ?', true);
+    const at = nowIso();
+    const etat = await getEtat(); etat.data.periodic = etat.data.periodic || {}; etat.data.periodic[k] = { at, by:who }; await Store.put('meta', etat, 'etat');
+    await queue('tache', { tache:{ k, t:PER[k].t, freq:FREQ[PER[k].f].l, at, by:who } });
+    closeSheet(); toast('Enregistré'); render(true);
+  };
+}
+async function viewFiche(){
+  const f = FICHE[route.args[0]]; if (!f) return go('#/clean');
+  V.innerHTML = `<a href="javascript:history.back()" class="small muted">← Retour</a><h2>${esc(f.t)}</h2><p class="hint">${esc(f.zone)}</p>
+    <div class="card"><h3>Quand</h3><p style="margin:0">${esc(f.freq)}</p></div>
+    ${f.fam.length ? `<div class="card"><h3>Avec quoi</h3>${f.fam.map(k => `<p style="margin:0 0 8px"><span class="fam ${k}">${esc(FAM[k].t)}</span>${FAM[k].ex ? ` <span class="small muted">${esc(FAM[k].ex)}</span>` : ''}<br><span class="small">${esc(FAM[k].why)}</span></p>`).join('')}</div>` : ''}
+    <div class="card"><h3>Comment</h3><ol class="steps6">${f.steps.map(s => `<li>${esc(s)}</li>`).join('')}</ol></div>
+    ${f.warn.length ? `<div class="rule bad"><b>Attention</b><ul class="tight">${f.warn.map(w => `<li>${esc(w)}</li>`).join('')}</ul></div>` : ''}`;
+}
+
+/* ============================================================
+   ALLERGÈNES
+   ============================================================ */
+let alSel = [], alQ = '';
+function viewAllerg(){
+  const list = PRODS.filter(p => (!alQ || normName(p[0] + ' ' + p[1]).includes(normName(alQ))) && alSel.every(a => p[2].includes(a) || p[3].includes(a) || p[4] === 'x'));
+  const cats = [...new Set(list.map(p => p[1]))];
+  V.innerHTML = `<h2>⚠️ Allergènes</h2><p class="hint">Aide-mémoire du buffet et du shop. Mise à jour des fiches : 01/09/2026.</p>
+    <details class="acc" open><summary>Un client signale une allergie : que faire ?</summary><div><ol class="steps6">
+      <li>Écouter : quel allergène ? Allergie grave ?</li>
+      <li>Ne jamais répondre de mémoire : consulter cette liste <b>et</b> l'étiquette du produit.</li>
+      <li>« Traces possibles » = déconseillé à une personne allergique.</li>
+      <li>Buffet en libre-service : des miettes ou une pince peuvent contaminer. Proposer un produit emballé individuellement ou servi depuis la réserve.</li>
+      <li>Préparer à part : mains lavées, gants neufs, ustensiles et assiette propres, produit sorti d'un emballage neuf.</li>
+      <li>Information « à vérifier » ou doute : ne pas servir, prévenir le responsable ou la réception.</li>
+      <li>Réaction (gonflement, difficulté à respirer, malaise) : appeler le <b>112</b>, prévenir la réception, ne pas laisser la personne seule. Si elle a un auto-injecteur d'adrénaline, l'aider à l'utiliser.</li></ol></div></details>
+    <div class="sec">Filtrer par allergène</div>
+    <div class="algrid">${AL.map(a => `<button class="al${alSel.includes(a[0]) ? ' on' : ''}" data-al="${a[0]}"><span class="e">${a[1]}</span><span>${esc(a[2])}${a[3] ? `<br><span class="small muted" style="font-weight:400">${esc(a[3])}</span>` : ''}</span></button>`).join('')}</div>
+    <input class="inp" id="alq" placeholder="Rechercher un produit" value="${esc(alQ)}" style="margin:12px 0">
+    ${alSel.length ? `<div class="rule">Produits qui <b>contiennent</b> ou <b>peuvent contenir</b> : ${alSel.map(a => ALN[a][2]).join(', ')} — à éviter pour ce client. Les produits « à vérifier » sont aussi listés.</div>` : ''}
+    ${cats.map(c => `<div class="sec">${esc(c)}</div>` + list.filter(p => p[1] === c).map(p => `<div class="prod"><div class="pn">${esc(p[0])}</div>
+      <div>${p[2].map(a => `<span class="tag c">${ALN[a][1]} ${esc(ALN[a][2])}</span>`).join('')}${p[3].map(a => `<span class="tag tr">Traces : ${esc(ALN[a][2])}</span>`).join('')}
+      ${!p[2].length && !p[3].length && p[4] !== 'x' ? '<span class="tag no">Aucun allergène déclaré</span>' : ''}${p[4] ? `<span class="tag w">⚠ ${esc(ST_LABEL[p[4]])}</span>` : ''}</div>
+      ${p[5] ? `<div class="small muted" style="margin-top:4px">${esc(p[5])}</div>` : ''}</div>`).join('')).join('') || '<p class="empty">Aucun produit.</p>'}
+    <p class="small muted" style="margin-top:14px">Informations tirées des fiches fournisseurs disponibles ; elles peuvent changer avec la référence livrée. En cas de doute : l'étiquette du produit fait foi, et on ne garantit jamais « sans ».</p>`;
+  $$('[data-al]').forEach(b => b.onclick = () => { const k = b.dataset.al; alSel = alSel.includes(k) ? alSel.filter(x => x !== k) : alSel.concat(k); render(true); });
+  $('#alq').oninput = e => { alQ = e.target.value; clearTimeout(viewAllerg._t); viewAllerg._t = setTimeout(() => { render(true).then(() => { const i = $('#alq'); i.focus(); i.setSelectionRange(i.value.length, i.value.length); }); }, 250); };
+}
+
+/* ============================================================
+   RÈGLES (mémo HACCP)
+   ============================================================ */
+function viewMemo(){
+  const open = route.args[0] || '';
+  const sec = (k, t, html) => `<details class="acc" id="m-${k}" ${open === k ? 'open' : ''}><summary>${t}</summary><div>${html}</div></details>`;
+  V.innerHTML = `<h2>📖 Règles d'hygiène</h2><p class="hint">L'essentiel à savoir, à relire en cas de doute.</p>` +
+    sec('temp', '🌡️ Températures de référence', `<table class="t"><tr><th>Quoi</th><th>Limite légale</th><th>Cible AABD</th><th>Si dépassé</th></tr>
+      <tr><td>Frigos</td><td><b>≤ 7 °C</b></td><td>≤ 4 °C</td><td>4–7 °C : surveiller · &gt; 7 °C : isoler, prévenir</td></tr>
+      <tr><td>Congélateurs</td><td><b>≤ −18 °C</b></td><td>≤ −18 °C</td><td>jusqu'à −15 °C toléré · au-delà : isoler, prévenir</td></tr>
+      <tr><td>Buffet froid</td><td><b>≤ 7 °C</b></td><td>≤ 5 °C</td><td>5–7 °C : surveiller · &gt; 7 °C : jeter et remplacer</td></tr>
+      <tr><td>Buffet chaud</td><td><b>≥ 60 °C</b> à cœur</td><td>≥ 65 °C</td><td>60–65 °C : monter l'induction · 55–60 °C : réchauffer et re-mesurer · &lt; 55 °C : jeter</td></tr>
+      <tr><td>Refroidissement</td><td>&lt; 10 °C en 2 h</td><td>puis ≤ 7 °C</td><td>pas refroidi à temps : jeter</td></tr>
+      <tr><td>Lave-vaisselle (rinçage)</td><td>—</td><td>≥ 85 °C</td><td>assiette qui sort humide : technique</td></tr>
+      <tr><td>Livraison</td><td>≤ 7 °C · ≤ −18 °C</td><td></td><td>voir l'app Livraisons de la réception</td></tr></table>
+      <p class="small">Une étiquette qui impose une température plus basse (ex. « entre 0 et 4 °C ») prime : le frigo concerné peut recevoir sa propre limite dans les réglages.</p>
+      <p class="small">Mesurer avec la sonde glissée entre deux produits ou au cœur du produit — jamais sur l'afficheur du frigo. Désinfecter la sonde entre deux produits.</p>
+      <p class="small muted">Référentiel ${esc(REF.version)}. Limites légales : AR du 13/07/2014 (annexe IV). Cibles internes : à confirmer par le responsable HACCP.</p>`) +
+    sec('mains', '🧼 Lavage des mains', `<p><b>Quand ?</b></p><ul class="tight"><li>En arrivant, avant de toucher un aliment</li><li>Après chaque interruption, pause, cigarette, toilettes</li><li>Après les poubelles, le linge sale, les emballages de livraison, la vaisselle sale</li><li>Après avoir toussé, éternué, touché son visage ou son téléphone</li><li>Avant de mettre des gants</li></ul>
+      <p><b>Comment ?</b></p><ol class="steps6"><li>Mouiller, savon</li><li>Frotter 30 secondes : paumes, dos, entre les doigts, ongles, pouces, poignets</li><li>Rincer</li><li>Sécher au papier à usage unique</li><li>Fermer le robinet avec le papier</li></ol>`) +
+    sec('dlc', '📅 Dates, étiquettes et calcul', `<p><b>DLC</b> « à consommer jusqu'au » : date impérative, jamais dépassée. <b>DDM</b> « à consommer de préférence avant » : qualité.</p>
+      <p><b>Le plus court devant (FEFO)</b> : on sort d'abord ce qui périme le plus tôt, même si c'est arrivé hier.</p>
+      <p><b>Produit ouvert, décongelé ou déconditionné</b> : étiquette avec produit, ouvert le, à utiliser avant, initiales. Sans indication sur l'emballage : ${REF.ouverture_jours} jours maximum, jamais au-delà de la date d'origine.</p>
+      <div class="card" style="margin:10px 0 0"><h3>Calculer « à utiliser avant »</h3>
+        <label class="f">Produit</label><input class="inp" id="dp" placeholder="ex. jambon">
+        <label class="f">Ouvert le</label><input class="inp" type="date" id="do" value="${ymd()}">
+        <label class="f">Date sur l'emballage (DLC) <span class="opt">(facultatif)</span></label><input class="inp" type="date" id="dd">
+        <label class="f">L'emballage dit « à consommer dans … jours après ouverture » <span class="opt">(sinon ${REF.ouverture_jours})</span></label>${stepper('dj', '', 1, true)}
+        <div id="dres"></div></div>`) +
+    sec('stock', '🧊 Rangement et stockage', `<ul class="tight"><li>Rien au sol, rien contre les murs.</li><li>Aucun carton de livraison dans les frigos : déballer à la réception.</li><li>Cru en bas, prêt à consommer en haut. Œufs crus rangés à part.</li><li>Produits filmés ou en boîte fermée, étiquetés.</li><li>Produits d'entretien jamais à côté des aliments, sprays étiquetés.</li><li>Livraison Java rangée au frais en moins de 15 minutes.</li><li>Ne jamais recongeler un produit décongelé.</li></ul>`) +
+    sec('flux', '🚪 Propre / sale et porte commune', `<ul class="tight"><li>Le sale ne croise jamais le propre.</li><li>Porte commune cuisine ↔ salle : un seul flux à la fois, le chariot <b>propre</b> passe en premier ; le chariot sale attend au point de dépose.</li><li>Vaisselle sale jamais près du buffet, jamais de chariot mixte.</li><li>Entre le sale et le propre : lavage des mains, tablier changé si besoin.</li><li>Les gants ne remplacent pas le lavage des mains.</li></ul>`) +
+    sec('buffet', '🍽️ Buffet et restes', `<ul class="tight"><li>Froid sorti au dernier moment, retiré en premier.</li><li>Réassort en petites quantités, jamais sur l'ancien : on change le bac.</li><li>Une pince par produit, changée si manipulée par un client.</li></ul>
+      <p><b>A. Exposé aux clients = déchet</b> (AFSCA)</p><ul class="tight"><li>Tout ce qui a été mis à disposition au buffet est jeté : charcuterie, fromages, pain, viennoiseries, fruits coupés, restes chauds, jus et lait des carafes.</li><li>Jamais conservé pour un autre service, ni pour le personnel.</li><li>Exception : portions emballées individuellement, restées fermées et au froid (yaourts, beurre, confitures, capsules) ; emballage ouvert, abîmé ou resté hors du froid → jeté.</li></ul>
+      <p><b>B. Surplus jamais sortis au buffet</b></p><ul class="tight"><li>Au frigo (≤ 7 °C) dans les 2 heures, en boîte fermée ou filmé.</li><li>Étiquette : produit, date et heure, « à utiliser avant », initiales (l'app la calcule).</li><li>Préparations froides, pain et viennoiseries : ${REF.surplus.froid} h maximum. Plats cuits : ${REF.surplus.cuit} h maximum, refroidis sous 10 °C en moins de 2 h.</li><li>Réchauffés à 60 °C minimum, une seule fois.</li></ul>
+      <p><b>C. Frigo du personnel</b></p><ul class="tight"><li>Mêmes règles qu'un frigo professionnel : ≤ 7 °C, étiquettes, dates respectées.</li><li>Jamais de reste du buffet ni de retour client.</li><li>Les repas personnels apportés par le personnel n'y sont pas mélangés aux produits de l'hôtel.</li></ul>`) +
+    sec('refroid', '❄️ Refroidissement après cuisson', `<ul class="tight"><li>De la cuisson à <b>moins de 10 °C en 2 heures maximum</b> (petits contenants, peu épais, jamais couverts hermétiquement pendant le refroidissement).</li><li>Puis au frigo à ≤ 7 °C.</li><li>Pas refroidi à temps → jeté.</li><li>Un produit cuit qui a été exposé au buffet ne se refroidit pas pour être gardé : il est jeté.</li></ul><p class="small muted">Circulaire AFSCA sur le don alimentaire (bonnes pratiques de refroidissement).</p>`) +
+    sec('gsm', '📱 Smartphone de service', `<ul class="tight"><li><b>GSM personnel</b> : interdit en cuisine, office, plonge, réserve et buffet pendant le service. Il reste au casier ; exception : urgence autorisée.</li>
+      <li><b>Smartphone de service PDJ</b> : uniquement pour l'app HACCP, les checklists, les appels professionnels et les urgences.</li>
+      <li>Rangé sur son support mural, hors zone alimentaire. Jamais sur un plan de travail, une planche, un chariot de denrées, dans un frigo, sur le lave-vaisselle, la machine à café ou un rebord d'évier.</li>
+      <li>Jamais utilisé en manipulant des denrées. Après l'avoir touché : <b>mains lavées</b> avant de toucher un aliment ou du matériel propre.</li>
+      <li>Nettoyé en début et en fin de service, après une souillure ou une chute, entre deux utilisateurs. <a href="#/fiche/gsm">Comment ›</a></li>
+      <li>Chaque personne choisit son nom dans l'app : c'est ce qui trace qui a fait chaque contrôle.</li></ul>`) +
+    sec('cuisson', '🥐 Cuissons', `<table class="t"><tr><th>Produit</th><th>Temps</th><th>Réglage</th></tr>${COOK.map(c => `<tr><td>${esc(c[0])}</td><td><b>${esc(c[1])}</b></td><td class="small">${esc(c[2])}${c[3] ? ' · ' + esc(c[3]) : ''}</td></tr>`).join('')}</table>
+      <p class="small">Œufs au cuiseur : eau entre MIN et MAX, 90° (70° si ça bout trop). Mollets 3 min · durs 9 min.</p>`) +
+    sec('incident', '🚨 En cas de problème', `<ul class="tight"><li><b>Température non conforme</b> : suivre l'écran d'écart de l'app, prévenir le responsable.</li>
+      <li><b>Produit suspect ou rappel fournisseur</b> : isoler « NE PAS UTILISER », garder l'emballage et le lot, prévenir le responsable.</li>
+      <li><b>Plusieurs clients malades après le repas</b> : prévenir immédiatement la direction, ne rien jeter (restes, emballages), noter ce qui a été servi. La direction décide de la notification à l'AFSCA.</li>
+      <li><b>Nuisible</b> (souris, cafards, mites) : photo, ne pas déplacer, prévenir le responsable.</li>
+      <li><b>Panne de frigo</b> : transférer les produits, prévenir la technique.</li>
+      <li><b>Produit chimique dans les yeux</b> : rincer 15 minutes à l'eau, fiche de sécurité au local d'entretien, Centre antipoisons <b>070 245 245</b>.</li>
+      <li><b>Urgence vitale</b> : <b>112</b>.</li></ul>`) +
+    sec('thermo', '🌡️ Thermomètre', `<ul class="tight"><li>Sonde nettoyée et désinfectée avant et après usage.</li><li>Contrôle au moins une fois par an : sonde dans l'eau bouillante → 100 °C. Écart de plus de 1 °C : faire vérifier ou remplacer, et noter le contrôle.</li><li>La date du dernier contrôle se note dans Plus › Réglages.</li></ul>`) +
+    sec('audit', '📋 Audit hygiène du 09/09/2026 : à ne plus revoir', `<p class="small muted">Score 74 % (feu rouge). Constats relevés :</p><ul class="tight">
+      <li>Lardons à 16,5 °C, lard à 34,7 °C, yaourt à 18,9 °C au buffet.</li><li>Oubli de la température du frigo lait de la machine à café.</li><li>Produits entamés, décongelés ou déconditionnés sans date (pains, cake, viennoiseries).</li>
+      <li>Filet de poulet et lardons dont la date était dépassée.</li><li>Frigos à nettoyer · œufs stockés à côté d'autres denrées.</li><li>Produits d'entretien à côté des denrées, spray non identifié, raclette et brosse au sol.</li>
+      <li>Poubelle sans couvercle en cuisine.</li><li>Lave-mains pas accessible, petite fuite au robinet.</li><li>Tenue civile · tasse de thé sur le plan de travail · gants mis sans lavage des mains.</li>
+      <li>Procédure allergènes pas connue.</li><li>Thermomètre à contrôler.</li></ul>`) +
+    `<p class="small muted" style="margin-top:14px">Sources : charte d'hygiène AABD, checklist PDJ, PND-CUI-01, PND-BUF-01, PRO-REC-01, PRO-FLU-01, procédure cuissons, audit du 09/09/2026.</p>`;
+  if (open){ const el = $('#m-' + open); if (el) setTimeout(() => el.scrollIntoView({ behavior:'smooth' }), 50); }
+  // Calculateur de date d'utilisation
+  let dj = null;
+  const calc = () => {
+    const o = $('#do').value, d = $('#dd').value, p = $('#dp').value.trim();
+    if (!o) { $('#dres').innerHTML = ''; return; }
+    const jours = dj || REF.ouverture_jours;
+    const lim = new Date(o + 'T12:00:00'); lim.setDate(lim.getDate() + jours);
+    let use = lim.toISOString().slice(0, 10), why = `ouverture + ${jours} jours`;
+    if (d && d < use) { use = d; why = 'date d\'origine (plus courte)'; }
+    const perime = d && d < ymd();
+    $('#dres').innerHTML = perime ? `<div class="rule bad" style="margin-top:12px"><b>Date dépassée : ne pas utiliser.</b> Retirer le produit et le noter.</div>` :
+      `<div style="margin-top:12px"><div class="small muted">À utiliser avant le</div><div class="big-date">${ymdFr(use)}</div><div class="small muted">${esc(why)}</div>
+       <div class="label-prev"><b>${esc(p || 'Produit')}</b><br>Ouvert le : ${ymdFr(o)}<br>À utiliser avant : <b>${ymdFr(use)}</b><br>Initiales : ____</div></div>`;
+  };
+  if ($('#do')){ ['do','dd','dp'].forEach(id => $('#' + id).oninput = calc); bindSteppers(V, (k, v) => { dj = v; calc(); }); calc(); }
+}
+
+/* ============================================================
+   PLUS : engagement, historique, réglages, configuration
+   ============================================================ */
+async function viewPlus(){
+  const ob = await Store.all('outbox');
+  V.innerHTML = await banners() + `<h2>☰ Plus</h2>
+    <div class="items">
+      <a class="item" href="#/charte"><span><span class="t">📝 Engagement hygiène</span><br><span class="s">Lire la charte et la signer</span></span><span>›</span></a>
+      <a class="item" href="#/engage"><span><span class="t">👥 Engagements signés</span><br><span class="s">Qui a signé, et quand</span></span><span>›</span></a>
+      <a class="item" href="#/hist"><span><span class="t">🗂️ Services sur ce GSM</span><br><span class="s">Historique et rapports envoyés</span></span><span>›</span></a>
+      <a class="item" href="#/config"><span><span class="t">📱 Installer sur un autre GSM</span><br><span class="s">QR code de l'app et de la configuration</span></span><span>›</span></a>
+      <a class="item" href="#/settings"><span><span class="t">⚙️ Réglages</span><br><span class="s">Responsable : frigos, buffet, horaires, thermomètre, relais</span></span><span>›</span></a>
+    </div>
+    <p class="small muted" style="margin-top:16px">Version ${APP_VERSION} · référentiel ${esc(REF.version)} · charte ${CHARTE_VERSION}${ob.length ? ' · ' + ob.length + ' envoi(s) en attente' : ''}</p>`;
+  wireBanners();
+}
+
+let quizAns = {};
+async function viewCharte(){
+  const names = await staffNames();
+  const allGood = QUIZ.every((q, i) => quizAns[i] === q[2]);
+  let who = pick.name || '', fn = '';
+  V.innerHTML = `<a href="javascript:history.back()" class="small muted">← Retour</a>
+    <h2>📝 Engagement hygiène et sécurité alimentaire</h2><p class="hint">Petit-déjeuner · Adagio Access Brussels Delta · version ${CHARTE_VERSION}</p>
+    <div class="card charte">${CHARTE.map(([t, l]) => `<h4>${esc(t)}</h4><ul>${l.map(x => `<li>${esc(x)}</li>`).join('')}</ul>`).join('')}</div>
+    <h3>Vérifions ensemble (${QUIZ.length} questions)</h3><p class="small muted" style="margin-top:-6px">Toutes les réponses doivent être justes pour signer. Vous pouvez recommencer.</p>
+    ${QUIZ.map((q, i) => { const a = quizAns[i];
+      return `<div class="q"><b>${i + 1}. ${esc(q[0])}</b><div class="opts">${q[1].map((o, j) => `<button class="opt${a === j ? (j === q[2] ? ' good' : ' wrong') : ''}" data-q="${i}" data-a="${j}">${esc(o)}</button>`).join('')}</div>
+      ${a !== undefined ? `<div class="why ${a === q[2] ? '' : ''}">${a === q[2] ? '✅ ' : '❌ Pas tout à fait. '}${esc(q[3])}</div>` : ''}</div>`; }).join('')}
+    <div class="card" ${allGood ? '' : 'style="opacity:.5;pointer-events:none"'}>
+      <h3>Je m'engage</h3>
+      <p>Je déclare avoir lu et compris ces règles. Je m'engage à les appliquer, à contrôler, corriger et noter toute anomalie.</p>
+      <label class="f">Prénom et nom</label>${names.length ? chips('cw', names, who) : ''}<input class="inp" id="cwn" value="${esc(who)}" placeholder="Prénom Nom" style="margin-top:8px">
+      <label class="f">Fonction</label>${chips('cf', FONCTIONS, fn)}
+      <label class="f">Signature</label>${signatureBlock()}
+      <button class="btn block primary" style="margin-top:14px" id="csign">Signer l'engagement</button>
+    </div>`;
+  $$('[data-q]').forEach(b => b.onclick = () => { quizAns[+b.dataset.q] = +b.dataset.a; render(true); });
+  bindChips(V, 'cw', v => { $('#cwn').value = v; });
+  bindChips(V, 'cf', v => { fn = v; });
+  const sig = wireSignature(V);
+  $('#csign').onclick = async () => {
+    const name = $('#cwn').value.trim();
+    if (name.split(/\s+/).length < 2) return toast('Prénom et nom', true);
+    if (!fn) return toast('Choisissez votre fonction', true);
+    if (sig.isEmpty()) return toast('Signature obligatoire', true);
+    const e = { id:'ENG-' + uid(), name, fonction:fn, at:nowIso(), version:CHARTE_VERSION, quiz:`${QUIZ.length}/${QUIZ.length}`, signature:sig.toPng() };
+    await Store.put('engagements', e); await rememberName(name);
+    await queue('engagement', { engagement:{ id:e.id, name, fonction:fn, at:e.at, version:e.version, quiz:e.quiz }, charte:CHARTE, quiz:QUIZ.map(q => [q[0], q[1][q[2]]]) },
+      [{ name:`Engagement ${name} ${e.at.slice(0, 10)}.png`, mime:'image/png', data:e.signature.split(',')[1] }]);
+    quizAns = {}; pick.name = name;
+    toast('Merci ! Engagement signé.');
+    go('#/');
+  };
+}
+async function viewEngagements(){
+  const etat = await getEtat(), loc = await Store.all('engagements');
+  const map = new Map();
+  (etat.data.engagements || []).concat(loc.map(e => ({ name:e.name, fonction:e.fonction, at:e.at, version:e.version, local:!e.sentAt }))).forEach(e => {
+    const k = normName(e.name); if (!map.has(k) || String(map.get(k).at) < String(e.at)) map.set(k, e);
+  });
+  const rows = [...map.values()].sort((a, b) => a.name.localeCompare(b.name, 'fr'));
+  V.innerHTML = `<a href="#/plus" class="small muted">← Plus</a><h2>👥 Engagements signés</h2><p class="hint">Valables 12 mois, et à renouveler si la charte change.</p>
+    ${rows.length ? `<div class="items">${rows.map(e => { const age = daysBetween(e.at, nowIso()), ok = age <= 365 && e.version === CHARTE_VERSION;
+      return `<div class="item"><span><span class="t">${esc(e.name)}</span><br><span class="s">${esc(e.fonction || '')} · signé le ${fmtD(e.at)}${e.local ? ' · pas encore envoyé' : ''}</span></span><span class="pill ${ok ? 'p-ok' : 'p-bad'}">${ok ? 'Valable' : e.version !== CHARTE_VERSION ? 'À relire' : 'Expiré'}</span></div>`; }).join('')}</div>` : '<p class="empty">Aucun engagement enregistré.</p>'}
+    <p class="small muted">${etat.at ? 'Liste du registre mise à jour le ' + fmt(etat.at) : 'Liste du registre pas encore reçue (GSM non relié ou hors ligne).'}</p>`;
+}
+async function viewHist(){
+  const all = (await Store.all('services')).sort((a, b) => b.startedAt.localeCompare(a.startedAt));
+  const id = route.args[0];
+  if (id){
+    const s = all.find(x => x.id === id); if (!s) return go('#/hist');
+    const r = s.report;
+    V.innerHTML = `<a href="#/hist" class="small muted">← Services</a><h2>${esc(s.id)}</h2><p class="hint">${esc(s.operator)} · ${fmt(s.startedAt)} → ${s.closedAt ? fmt(s.closedAt) : 'en cours'}</p>
+      ${r ? `<div class="card"><dl class="kv"><dt>Résultat</dt><dd>${esc(r.result)}</dd><dt>Réservés</dt><dd>${r.reserved}</dd><dt>Consommés</dt><dd>${r.counts.total} (adultes ${r.counts.adultes}, enfants ${r.counts.enfants}, offerts ${r.counts.offerts})</dd><dt>Facturés</dt><dd>${r.counts.factures}</dd><dt>Écarts</dt><dd>${r.ecarts.length}</dd><dt>Non réalisé</dt><dd>${r.nonFait.length}</dd><dt>Rapport</dt><dd>${s.sentAt ? 'Envoyé le ' + fmt(s.sentAt) : 'En attente d\'envoi'}</dd></dl></div>
+      <div class="card"><h3>Températures</h3><table class="t">${r.temps.map(t => `<tr><td class="small">${esc(t.ctx)}</td><td>${esc(t.obj)}</td><td><b>${fmtT(t.v)}</b></td><td class="small">${esc(t.verdict)}${t.re ? ' → ' + fmtT(t.re.v) : ''}</td></tr>`).join('')}</table></div>
+      ${r.ecarts.length ? `<div class="card"><h3>Écarts</h3><ul class="tight">${r.ecarts.map(e => `<li>${fmtH(e.at)} · <b>${esc(e.obj || e.cat)}</b> ${esc(e.val || '')} — ${esc(e.action || '')}</li>`).join('')}</ul></div>` : ''}
+      ${r.handover ? `<div class="card"><h3>Passation</h3><p>${esc(r.handover)}</p></div>` : ''}` : '<p class="muted">Service non clôturé.</p>'}`;
+    return;
+  }
+  V.innerHTML = `<a href="#/plus" class="small muted">← Plus</a><h2>🗂️ Services sur ce GSM</h2>
+    ${all.length ? `<div class="items">${all.map(s => `<a class="item" href="#/hist/${encodeURIComponent(s.id)}"><span><span class="t">${esc(fmtD(s.startedAt))} · ${esc(s.operator)}</span><br><span class="s">${s.closedAt ? (s.sentAt ? 'Rapport envoyé ✓' : 'Rapport en attente d\'envoi') : 'En cours'} · ${s.ecarts.length} écart(s)</span></span><span>›</span></a>`).join('')}</div>` : '<p class="empty">Aucun service sur ce GSM.</p>'}
+    <p class="small muted">Le registre complet (tous les GSM) est dans le Google Sheet « Registre PDJ & hygiène — AABD ».</p>`;
+}
+
+/* ---------- Configuration d'un autre GSM (QR) ---------- */
+const QR_URL = 'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';
+function loadQr(){ return window.QRCode ? Promise.resolve() : new Promise((res, rej) => { const s = document.createElement('script'); s.src = QR_URL; s.onload = res; s.onerror = () => rej(new Error('QR indisponible hors ligne')); document.head.appendChild(s); }); }
+const b64url = s => btoa(unescape(encodeURIComponent(s))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+const unb64url = s => decodeURIComponent(escape(atob(s.replace(/-/g, '+').replace(/_/g, '/'))));
+const appBase = () => location.href.split('#')[0];
+async function viewConfig(){
+  const s = await getSettings();
+  const cfgLink = s.relayUrl && s.token ? appBase() + '#cfg=' + b64url(JSON.stringify({ u:s.relayUrl, t:s.token })) : '';
+  V.innerHTML = `<a href="#/plus" class="small muted">← Plus</a><h2>📱 Installer sur un autre GSM</h2>
+    <div class="card"><h3>1. Ouvrir l'app</h3><p class="small">Scannez ce QR avec l'appareil photo de l'autre GSM, puis menu Chrome ⋮ › « Ajouter à l'écran d'accueil ».</p><div class="qr" id="qr1"></div><p class="small muted" style="word-break:break-all">${esc(appBase())}</p></div>
+    <div class="card"><h3>2. Relier au registre</h3>${cfgLink ? `<p class="small">Scannez ce second QR : il relie le GSM au registre (mail, Google Sheet). <b>Ne le partagez pas en dehors de l'équipe.</b></p><button class="btn block ghost" id="showcfg">Afficher le QR de configuration</button><div class="qr" id="qr2" hidden></div>` : '<p class="muted">Ce GSM n\'est pas encore relié au registre (Réglages).</p>'}</div>`;
+  try {
+    await loadQr();
+    new QRCode($('#qr1'), { text:appBase(), width:220, height:220 });
+    if (cfgLink) $('#showcfg').onclick = () => {
+      if (s.pin && !unlocked) { toast('Déverrouillez d\'abord les réglages (code responsable)', true); return go('#/settings'); }
+      $('#qr2').hidden = false; $('#qr2').innerHTML = ''; new QRCode($('#qr2'), { text:cfgLink, width:260, height:260 }); $('#showcfg').hidden = true;
+    };
+  } catch(e){ $('#qr1').innerHTML = `<p class="muted">${esc(e.message)}</p>`; }
+}
+
+/* ---------- Réglages (code responsable) ---------- */
+async function viewSettings(){
+  const s = await getSettings();
+  if (s.pin && !unlocked){
+    V.innerHTML = `<a href="#/plus" class="small muted">← Plus</a><h2>⚙️ Réglages</h2><div class="card"><h3>Code responsable</h3>
+      <input class="inp" id="pin" inputmode="numeric" type="password" placeholder="Code" autocomplete="off"><button class="btn block primary" style="margin-top:12px" id="pinok">Déverrouiller</button></div>`;
+    const ok = () => { if ($('#pin').value === s.pin) { unlocked = true; render(); } else toast('Code incorrect', true); };
+    $('#pinok').onclick = ok; $('#pin').onkeydown = e => { if (e.key === 'Enter') ok(); };
+    return;
+  }
+  const listEdit = (key, items, fmtItem) => `<div class="items" style="margin-bottom:8px">${items.map((it, i) => `<div class="item"><span>${fmtItem(it)}</span><button class="btn small ghost" data-del="${key}:${i}">✕</button></div>`).join('')}</div>`;
+  V.innerHTML = `<a href="#/plus" class="small muted">← Plus</a><h2>⚙️ Réglages</h2>
+    <div class="card"><h3>Relais (registre, mails)</h3>
+      <label class="f">Code de configuration <span class="opt">(reçu par mail : PDJ-CONFIG|…)</span></label><input class="inp" id="cfgcode" placeholder="PDJ-CONFIG|https://script.google.com/…/exec|jeton">
+      <button class="btn small ghost" id="cfgapply" style="margin-top:8px">Appliquer le code</button>
+      <label class="f">URL du relais</label><input class="inp" id="relay" value="${esc(s.relayUrl)}" placeholder="https://script.google.com/macros/s/…/exec">
+      <label class="f">Jeton</label><input class="inp" id="token" value="${esc(s.token)}" autocomplete="off">
+      <div class="row" style="margin-top:10px"><button class="btn small primary" id="saverelay">Enregistrer</button><button class="btn small ghost" id="ping">Tester la connexion</button></div></div>
+    <div class="card"><h3>Frigos et congélateurs à relever</h3>${listEdit('enc', s.enceintes, e => `${esc(e.n)} <span class="small muted">(${e.t === 'neg' ? 'congélateur' : 'frigo'}${e.max !== undefined && e.max !== null ? ' · limite ≤ ' + fmtT(e.max) + (e.why ? ' — ' + esc(e.why) : '') : ''})</span>`)}
+      <div class="row"><input class="inp" id="encn" placeholder="Nom de l'enceinte" style="flex:2 1 160px"><select class="inp" id="enct" style="flex:1 1 120px"><option value="pos">Frigo</option><option value="neg">Congélateur</option></select></div>
+      <label class="f">Limite plus stricte que 7 °C <span class="opt">(frigo seulement, facultatif — ex. étiquette « conserver entre 0 et 4 °C »)</span></label>
+      <div class="row"><input class="inp" id="encmax" inputmode="decimal" placeholder="ex. 4" style="flex:1 1 90px"><input class="inp" id="encwhy" placeholder="Pourquoi (produits stockés)" style="flex:3 1 180px"></div>
+      <button class="btn small ghost" id="encadd" style="margin-top:8px">+ Ajouter</button>
+      <p class="small muted">Toute modification d'un seuil doit être validée par le responsable HACCP (elle est tracée sur chaque relevé).</p></div>
+    <div class="card"><h3>Buffet chaud à relever</h3>${listEdit('chaud', s.chaud, esc)}<div class="row"><input class="inp" id="chaudn" style="flex:1"><button class="btn small ghost" id="chaudadd">+</button></div></div>
+    <div class="card"><h3>Buffet froid à relever</h3>${listEdit('froid', s.froid, esc)}<div class="row"><input class="inp" id="froidn" style="flex:1"><button class="btn small ghost" id="froidadd">+</button></div></div>
+    <div class="card"><h3>Heures des relevés du buffet</h3><div class="row">${s.rounds.map((r, i) => `<input class="inp" type="time" data-round="${i}" value="${esc(r)}" style="flex:1 1 90px">`).join('')}</div></div>
+    <div class="card"><h3>Thermomètre</h3><label class="f">N° / identification</label><input class="inp" id="thid" value="${esc(s.thermoId)}">
+      <label class="f">Dernier contrôle (eau bouillante 100 °C)</label><input class="inp" type="date" id="thcal" value="${esc(s.thermoCalib)}"></div>
+    <div class="card"><h3>Code responsable</h3><p class="small muted">Protège ces réglages et le QR de configuration. Laisser vide = pas de code.</p><input class="inp" id="newpin" inputmode="numeric" value="${esc(s.pin)}" placeholder="4 chiffres"></div>
+    <button class="btn block primary" id="saveall">Enregistrer les réglages</button>
+    <details class="acc" style="margin-top:16px"><summary>Zone de maintenance</summary><div>
+      <p class="small">Stockage : ${s.persisted ? 'protégé ✓' : 'non garanti par le navigateur'}.</p>
+      <button class="btn small danger" id="abandon" ${S ? '' : 'disabled'}>Abandonner le service en cours</button>
+      <p class="small muted">Réservé au responsable (service ouvert par erreur). Le service abandonné n'est pas envoyé.</p></div></details>`;
+  $('#cfgapply').onclick = () => {
+    const m = $('#cfgcode').value.trim().match(/^PDJ-CONFIG\|(https:\/\/\S+)\|(\S+)$/);
+    if (!m) return toast('Code invalide', true);
+    $('#relay').value = m[1]; $('#token').value = m[2]; toast('Code appliqué — enregistrez');
+  };
+  $('#saverelay').onclick = async () => { const n = await getSettings(); n.relayUrl = $('#relay').value.trim(); n.token = $('#token').value.trim(); await saveSettings(n); toast('Enregistré'); flushOutbox(); fetchEtat(); };
+  $('#ping').onclick = async () => {
+    try { const j = await relay({ kind:'ping' }); toast('Connexion OK — compte ' + (j.account || '')); await fetchEtat(); }
+    catch(e){ toast('Échec : ' + e.message, true); }
+  };
+  $$('[data-del]').forEach(b => b.onclick = async () => {
+    const [k, i] = b.dataset.del.split(':'), n = await getSettings();
+    const key = { enc:'enceintes', chaud:'chaud', froid:'froid' }[k];
+    n[key] = n[key].slice(); n[key].splice(+i, 1); await saveSettings(n); render(true);
+  });
+  $('#encadd').onclick = async () => {
+    const v = $('#encn').value.trim(); if (!v) return;
+    const t = $('#enct').value, max = toNum($('#encmax').value), why = $('#encwhy').value.trim();
+    if (max !== null && (t !== 'pos' || max >= REF.pos.legal || max < -2)) return toast('Limite spécifique : frigo uniquement, entre −2 et 7 °C', true);
+    if (max !== null && !why) return toast('Indiquez pourquoi (produits stockés)', true);
+    const n = await getSettings(); n.enceintes = n.enceintes.concat(Object.assign({ n:v, t }, max !== null ? { max, why } : {})); await saveSettings(n); render(true);
+  };
+  $('#chaudadd').onclick = async () => { const v = $('#chaudn').value.trim(); if (!v) return; const n = await getSettings(); n.chaud = n.chaud.concat(v); await saveSettings(n); render(true); };
+  $('#froidadd').onclick = async () => { const v = $('#froidn').value.trim(); if (!v) return; const n = await getSettings(); n.froid = n.froid.concat(v); await saveSettings(n); render(true); };
+  $('#saveall').onclick = async () => {
+    const n = await getSettings();
+    n.rounds = $$('[data-round]').map(i => i.value || DEFAULTS.rounds[+i.dataset.round]);
+    n.thermoId = $('#thid').value.trim(); n.thermoCalib = $('#thcal').value; n.pin = $('#newpin').value.trim();
+    await saveSettings(n); unlocked = true; toast('Réglages enregistrés');
+  };
+  $('#abandon').onclick = async () => {
+    if (!S || !confirm('Abandonner le service en cours ? Il ne sera pas envoyé.')) return;
+    S.closedAt = nowIso(); S.abandoned = true; await saveS(); S = null; toast('Service abandonné'); go('#/');
+  };
+}
+
+/* ============================================================
+   Démarrage
+   ============================================================ */
+async function applyConfigLink(){
+  const m = location.hash.match(/^#cfg=([A-Za-z0-9_-]+)/);
+  if (!m) return false;
+  try {
+    const c = JSON.parse(unb64url(m[1]));
+    if (!/^https:\/\/script\.google\.com\//.test(c.u) || !c.t) throw new Error('lien incomplet');
+    const s = await getSettings(); s.relayUrl = c.u; s.token = c.t; await saveSettings(s);
+    history.replaceState(null, '', location.pathname + '#/');
+    toast('GSM relié au registre ✓');
+    return true;
+  } catch(e){ history.replaceState(null, '', location.pathname + '#/'); toast('Lien de configuration invalide', true); return false; }
+}
+(async function init(){
+  refreshChrome();
+  await applyConfigLink();
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+  try {
+    const s = await getSettings();
+    if (s.persisted === null && navigator.storage && navigator.storage.persist){ s.persisted = await navigator.storage.persist(); await saveSettings(s); }
+  } catch(e){}
+  await render();
+  flushOutbox();
+  fetchEtat().then(rerenderSoft);
+  setInterval(() => { if (route.name === 'home' && !$('#sheet').innerHTML && !document.activeElement.matches('input,textarea')) render(true); }, 60000);
+})();
+</script>
+</body>
+</html>
