@@ -1,6 +1,6 @@
 // Service worker — PDJ & Hygiène AABD
 // Changer CACHE à chaque publication pour forcer la mise à jour des fichiers.
-const CACHE = 'aabd-pdj-v1.1.0';
+const CACHE = 'aabd-pdj-v1.1.1';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {

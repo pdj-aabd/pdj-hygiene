@@ -201,7 +201,7 @@ dl.kv dt{color:var(--muted)} dl.kv dd{margin:0;font-weight:600;word-break:break-
 
 <script>
 'use strict';
-const APP_VERSION = '1.1.0';
+const APP_VERSION = '1.1.1';
 const CHARTE_VERSION = '2026-09';
 
 /* ============================================================
@@ -895,6 +895,8 @@ async function queue(kind, payload, attachments){
 let flushing = false;
 async function relay(body){
   const s = await getSettings();
+  if (!/^https:\/\/script\.google\.com\/.+\/exec$/.test(s.relayUrl || '')) throw new Error('adresse du relais absente ou incorrecte (elle doit finir par /exec)');
+  if (!s.token) throw new Error('jeton absent');
   const r = await fetch(s.relayUrl, { method:'POST', headers:{ 'Content-Type':'text/plain;charset=utf-8' }, body: JSON.stringify(Object.assign({}, body, { token:s.token })) });
   const j = await r.json().catch(() => ({ ok:false, error:'Réponse illisible du relais (HTTP ' + r.status + ')' }));
   if (!j.ok) throw new Error(j.error || 'Refusé par le relais');
@@ -1843,13 +1845,18 @@ async function viewSettings(){
       <p class="small">Stockage : ${s.persisted ? 'protégé ✓' : 'non garanti par le navigateur'}.</p>
       <button class="btn small danger" id="abandon" ${S ? '' : 'disabled'}>Abandonner le service en cours</button>
       <p class="small muted">Réservé au responsable (service ouvert par erreur). Le service abandonné n'est pas envoyé.</p></div></details>`;
-  $('#cfgapply').onclick = () => {
-    const m = $('#cfgcode').value.trim().match(/^PDJ-CONFIG\|(https:\/\/\S+)\|(\S+)$/);
-    if (!m) return toast('Code invalide', true);
-    $('#relay').value = m[1]; $('#token').value = m[2]; toast('Code appliqué — enregistrez');
+  // Enregistre ce qui est à l'écran (évite de tester une ancienne valeur ou une adresse vide)
+  const saveRelay = async () => { const n = await getSettings(); n.relayUrl = $('#relay').value.trim(); n.token = $('#token').value.trim(); await saveSettings(n); };
+  $('#cfgapply').onclick = async () => {
+    // Outlook coupe parfois le code sur plusieurs lignes : on retire tous les blancs avant de lire
+    const m = $('#cfgcode').value.replace(/\s+/g, '').match(/^PDJ-CONFIG\|(https:\/\/script\.google\.com\/\S+\/exec)\|(\w+)$/);
+    if (!m) return toast('Code invalide : copiez toute la ligne PDJ-CONFIG|…', true);
+    $('#relay').value = m[1]; $('#token').value = m[2];
+    await saveRelay(); toast('Code appliqué et enregistré — testez la connexion'); flushOutbox(); fetchEtat();
   };
-  $('#saverelay').onclick = async () => { const n = await getSettings(); n.relayUrl = $('#relay').value.trim(); n.token = $('#token').value.trim(); await saveSettings(n); toast('Enregistré'); flushOutbox(); fetchEtat(); };
+  $('#saverelay').onclick = async () => { await saveRelay(); toast('Enregistré'); flushOutbox(); fetchEtat(); };
   $('#ping').onclick = async () => {
+    await saveRelay();
     try { const j = await relay({ kind:'ping' }); toast('Connexion OK — compte ' + (j.account || '')); await fetchEtat(); }
     catch(e){ toast('Échec : ' + e.message, true); }
   };
