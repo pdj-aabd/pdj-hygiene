@@ -4,7 +4,7 @@
 // aussi l'app Terrain (/terrain-aabd/). On ne supprime donc que NOS propres caches :
 // un filtre aveugle effacerait le cache hors ligne de l'autre app.
 const PREFIXE = 'aabd-pdj-';
-const CACHE = PREFIXE + 'v1.1.3';
+const CACHE = PREFIXE + 'v1.2.0';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {

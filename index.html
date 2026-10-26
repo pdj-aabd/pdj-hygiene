@@ -107,6 +107,12 @@ code{background:#F1ECE4;padding:1px 5px;border-radius:5px;font-size:14px;word-br
 .v-bad{background:var(--bad-soft);color:var(--bad);border-color:var(--bad)}
 .tval{font-size:22px;font-weight:800}
 .tmeta{color:var(--muted);font-size:13px}
+.trow.pre{border-style:dashed;border-color:#F5C99B;background:#FFFCF7}
+.qrow{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:6px}
+.slotsel{min-height:44px;padding:6px 10px;border:2px solid var(--line);border-radius:10px;background:#fff;font-size:14px;max-width:100%}
+.quickbar{background:var(--info-soft);color:var(--info);border:1px solid #C9D0E6;border-radius:var(--radius);padding:12px 14px;margin-bottom:14px;font-size:15px}
+.quickbar .btn{margin-top:8px}
+.vlist a{display:block;padding:8px 0;border-bottom:1px solid var(--line);text-decoration:none}
 .round-h{display:flex;justify-content:space-between;align-items:center;margin:18px 0 8px}
 .round-h b{font-size:18px}
 /* Listes, tableaux, accordéons */
@@ -201,7 +207,7 @@ dl.kv dt{color:var(--muted)} dl.kv dd{margin:0;font-weight:600;word-break:break-
 
 <script>
 'use strict';
-const APP_VERSION = '1.1.3';
+const APP_VERSION = '1.2.0';
 const CHARTE_VERSION = '2026-09';
 
 /* ============================================================
@@ -231,8 +237,24 @@ const DEFAULTS = {
   ],
   chaud: ['Œufs brouillés', 'Lardons / bacon'],
   froid: ['Charcuterie', 'Fromages', 'Yaourts / fromage blanc', 'Lait (buffet)'],
-  rounds: ['07:00', '08:30', '10:00']
+  rounds: ['07:00', '08:30', '10:00'],
+  // Créneaux prédéfinis des relevés de température (plan de contrôle interne) : [début, fin]
+  slots: { open:['06:00','07:00'], r1:['07:00','07:30'], r2:['08:30','09:00'], r3:['09:45','10:15'], close:['10:30','11:30'] }
 };
+
+/* ---------- Créneaux des relevés ----------
+   Chaque relevé est rattaché d'office au créneau prévu pour son contrôle (modifiable relevé par relevé).
+   Le rapport opérationnel n'affiche que le créneau ; l'heure réelle de saisie reste dans les données (onglet Audit). */
+const SLOT_KEYS = ['open','r1','r2','r3','close'];
+const SLOT_LABEL = { open:'Ouverture', r1:'Buffet — ouverture', r2:'Buffet — milieu de service', r3:'Buffet — fin de service', close:'Fin de service', lv:'Contrôle hebdomadaire', autre:'Autre moment' };
+let STG = null; // derniers réglages lus (affichage des créneaux sans attendre)
+function slotsOf(st){
+  const s = Object.assign({}, DEFAULTS.slots, (st && st.slots) || {});
+  return s;
+}
+const defaultSlot = ctx => SLOT_KEYS.includes(ctx) || ctx === 'lv' ? ctx : 'autre';
+function slotRange(k, st){ const s = slotsOf(st || STG)[k]; return s ? `${s[0]}–${s[1]}` : ''; }
+function slotText(k, st){ const r = slotRange(k, st); return (SLOT_LABEL[k] || k) + (r ? ' · ' + r : ''); }
 
 /* ============================================================
    CONTENU MÉTIER — tiré des documents AABD (checklist PDJ, PND-CUI-01, PND-BUF-01, PRO-REC-01,
@@ -637,8 +659,14 @@ const Store = (() => {
 })();
 async function getSettings(){
   const s = await Store.get('meta', 'settings');
-  return Object.assign({ relayUrl:'', token:'', pin:'', enceintes:DEFAULTS.enceintes, chaud:DEFAULTS.chaud, froid:DEFAULTS.froid,
-    rounds:DEFAULTS.rounds, thermoId:'', thermoCalib:'', names:[], persisted:null }, s || {});
+  const st = Object.assign({ relayUrl:'', token:'', pin:'', enceintes:DEFAULTS.enceintes, chaud:DEFAULTS.chaud, froid:DEFAULTS.froid,
+    rounds:DEFAULTS.rounds, slots:null, quickAllowed:true, thermoId:'', thermoCalib:'', names:[], persisted:null }, s || {});
+  // Anciens réglages (v1.1) : créneaux du buffet déduits des heures de relevé, 30 min chacun
+  if (!st.slots) st.slots = Object.assign({}, DEFAULTS.slots, { r1:[st.rounds[0], addMin(st.rounds[0], 30)], r2:[st.rounds[1], addMin(st.rounds[1], 30)], r3:[st.rounds[2], addMin(st.rounds[2], 30)] });
+  st.slots = slotsOf(st);
+  st.rounds = ['r1','r2','r3'].map(k => st.slots[k][0]); // les heures du buffet suivent les créneaux
+  STG = st;
+  return st;
 }
 const saveSettings = s => Store.put('meta', s, 'settings');
 async function getEtat(){ return (await Store.get('meta', 'etat')) || { at:null, data:{ engagements:[], periodic:{}, handover:null } }; }
@@ -824,6 +852,57 @@ function tempKey(ctx, obj){ return ctx + '|' + obj; }
 function getTemp(ctx, obj){ return S.temps.find(t => t.key === tempKey(ctx, obj)); }
 async function roundsOf(){ const s = await getSettings(); return s.rounds; }
 
+/* ---------- MODE RAPIDE ----------
+   Pour le personnel expérimenté : tout est pré-coché et les températures sont pré-remplies à la valeur de référence
+   conforme (cible interne). Rien n'est verrouillé : on décoche ce qui n'est pas fait, on corrige la température
+   réellement mesurée, on marque « pas relevé ». Le pré-remplissage n'est jamais une valeur non conforme.
+   Tout est tracé (pré-rempli, modifié, décoché) pour l'audit ; le rapport opérationnel indique « mode rapide ». */
+function quickValue(kind, lim){
+  if (kind === 'pos') return lim !== undefined && lim !== null && lim !== '' && lim < REF.pos.cible ? lim : REF.pos.cible;
+  if (kind === 'neg') return REF.neg.legal;
+  if (kind === 'froid') return REF.froid.cible;
+  if (kind === 'chaud') return REF.chaud.cible;
+  if (kind === 'lv') return REF.lv.ok;
+  return null;
+}
+async function applyQuick(st, etat){
+  const at = nowIso(), by = S.operator;
+  const q = S.quick || { at, by, checks:[], periodic:[], temps:[] };
+  PHASES.forEach(p => (p.items || []).forEach(it => {
+    const k = p.k + '.' + it[0];
+    if (!S.checks[k]) { S.checks[k] = { at, by, pre:true }; q.checks.push(k); }
+  }));
+  const due = dueToday(etat);
+  due.forEach(x => { if (!S.periodic[x.p.k]) { S.periodic[x.p.k] = { at, by, pre:true }; q.periodic.push(x.p.k); } });
+  const add = (ctx, obj, kind, ctxLabel, lim) => {
+    if (getTemp(ctx, obj)) return;                       // une mesure déjà saisie n'est jamais écrasée
+    const v = quickValue(kind, lim), ev = evalT(kind, v, lim);
+    if (v === null || ev.cls !== 'ok') return;          // jamais de pré-remplissage non conforme
+    S.temps.push({ key:tempKey(ctx, obj), ctx, ctxLabel, obj, kind, v, at, by, verdict:ev.verdict, cls:ev.cls, msg:'', ref:REF.version,
+      lim, slot:defaultSlot(ctx), pre:true, prefill:v, mustRemeasure:false });
+    q.temps.push(tempKey(ctx, obj));
+  };
+  st.enceintes.forEach(e => { add('open', e.n, e.t, 'Frigos ouverture', e.max); add('close', e.n, e.t, 'Frigos fin de service', e.max); });
+  ['r1','r2','r3'].forEach((r, i) => { st.chaud.forEach(o => add(r, o, 'chaud', 'Buffet ' + st.rounds[i])); st.froid.forEach(o => add(r, o, 'froid', 'Buffet ' + st.rounds[i])); });
+  if (due.some(x => x.p.temp)) add('lv', 'Lave-vaisselle (rinçage)', 'lv', 'Contrôle hebdomadaire');
+  cookQty().forEach(([n, v]) => { if (S.cook.qty[n] === undefined || S.cook.qty[n] === null) S.cook.qty[n] = v; });
+  S.quick = q;
+  S.quickLog = S.quickLog || [];
+  S.quickLog.push({ at, by, type:'Mode rapide activé', what:`${q.checks.length + q.periodic.length} tâche(s) pré-cochée(s), ${q.temps.length} température(s) pré-remplie(s)` });
+  await saveS();
+}
+function quickLog(type, what, extra){ if (!S.quick) return; S.quickLog = (S.quickLog || []).concat(Object.assign({ at:nowIso(), by:S.operator, type, what }, extra || {})); }
+function quickStats(){
+  if (!S || !S.quick) return null;
+  const q = S.quick;
+  const decochees = q.checks.filter(k => !S.checks[k]).concat((q.periodic || []).filter(k => !S.periodic[k]));
+  const nonReleves = q.temps.filter(k => !S.temps.some(t => t.key === k));
+  const modifiees = S.temps.filter(t => t.prefill !== undefined && t.prefill !== null && !t.pre && t.v !== t.prefill);
+  const nc = S.temps.filter(t => (t.re ? t.re.cls : t.cls) !== 'ok');
+  return { decochees, nonReleves, modifiees, nc };
+}
+const quickLine = qs => `${qs.decochees.length} tâche(s) décochée(s) · ${qs.modifiees.length} température(s) modifiée(s) · ${qs.nonReleves.length} non relevée(s)${qs.nc.length ? ` · <b>${qs.nc.length} hors cible</b>` : ''}`;
+
 // Statut d'une phase
 function phaseStatus(p, st){
   const s = S;
@@ -981,12 +1060,12 @@ function parseHash(){
   const [name, ...args] = h.split('/').map(decodeURIComponent);
   return { name: name || 'home', args };
 }
-const TAB_OF = { home:'home', phase:'home', clean:'clean', fiche:'clean', allerg:'allerg', memo:'memo', plus:'plus', charte:'plus', hist:'plus', settings:'plus', engage:'plus', config:'plus' };
+const TAB_OF = { home:'home', phase:'home', verif:'home', clean:'clean', fiche:'clean', allerg:'allerg', memo:'memo', plus:'plus', charte:'plus', hist:'plus', settings:'plus', engage:'plus', config:'plus' };
 async function render(keepScroll){
   route = parseHash();
   const y = window.scrollY;
   $$('.tabs a').forEach(a => a.classList.toggle('on', a.dataset.tab === TAB_OF[route.name]));
-  const views = { home:viewHome, phase:viewPhase, clean:viewClean, fiche:viewFiche, allerg:viewAllerg, memo:viewMemo, plus:viewPlus, charte:viewCharte, hist:viewHist, settings:viewSettings, engage:viewEngagements, config:viewConfig };
+  const views = { home:viewHome, phase:viewPhase, verif:viewVerif, clean:viewClean, fiche:viewFiche, allerg:viewAllerg, memo:viewMemo, plus:viewPlus, charte:viewCharte, hist:viewHist, settings:viewSettings, engage:viewEngagements, config:viewConfig };
   await (views[route.name] || viewHome)();
   window.scrollTo(0, keepScroll ? y : 0);
 }
@@ -1011,7 +1090,7 @@ function wireBanners(){ const b = $('[data-retry]'); if (b) b.onclick = () => { 
 /* ============================================================
    Écran SERVICE (accueil)
    ============================================================ */
-let pick = { name:'', reserved:null };
+let pick = { name:'', reserved:null, quick:false };
 async function viewHome(){
   await loadOpenService();
   const st = await getSettings(), etat = await getEtat();
@@ -1030,11 +1109,14 @@ async function viewHome(){
   });
   if (!next){ const f = stats.find(x => !isDone(x.s.state) && x.p.k !== 'buffet'); if (f) next = { t:f.p.t, h:'#/phase/' + f.p.k, l:'À faire maintenant' }; }
   const openEcarts = S.ecarts.filter(e => !e.closed).length;
-  V.innerHTML = await banners() + (stale ? `<div class="banner bad"><span><b>Service du ${ymdFr(S.date)} non clôturé.</b><br>Clôturez-le avant d'en commencer un nouveau.</span><a class="btn small ghost" href="#/phase/cloture">Clôturer</a></div>` : '') + `
+  const qs = quickStats();
+  V.innerHTML = await banners() + (stale ? `<div class="banner bad"><span><b>Service du ${ymdFr(S.date)} non clôturé.</b><br>Clôturez-le avant d'en commencer un nouveau.</span><a class="btn small ghost" href="#/phase/cloture">Clôturer</a></div>` : '') +
+    (qs ? `<div class="quickbar">⚡ <b>Mode rapide</b> : tout est pré-coché et pré-rempli. Décochez ce qui n'est pas fait, corrigez les températures réellement mesurées.<br><span class="small">${quickLine(qs)}</span><br><a class="btn small ghost" href="#/verif">🔎 Tout vérifier</a></div>` : '') + `
     <div class="card">
       <div class="svc-head"><div><div class="t">${esc(longDate(S.startedAt))}</div><div class="muted">${esc(S.operator)} · ${S.reserved ?? '—'} PDJ réservés · depuis ${fmtH(S.startedAt)}</div></div>
       <span class="pill ${openEcarts ? 'p-bad' : 'p-ok'}">${openEcarts ? openEcarts + ' écart(s)' : 'Aucun écart'}</span></div>
-      <button class="btn small ghost" style="margin-top:8px" data-handoff>👤 Passer la main</button>
+      <div class="row" style="margin-top:8px"><button class="btn small ghost" data-handoff>👤 Passer la main</button>
+      ${!S.quick && st.quickAllowed ? '<button class="btn small ghost" data-quick>⚡ Mode rapide</button>' : ''}</div>
       <div class="bar"><i style="width:${Math.round(doneN / PHASES.length * 100)}%"></i></div>
       <div class="small muted" style="margin-top:4px">${doneN} étape(s) sur ${PHASES.length}</div>
     </div>
@@ -1048,6 +1130,34 @@ async function viewHome(){
   wireBanners();
   $('[data-signal]').onclick = () => openSignal();
   $('[data-handoff]').onclick = () => openHandoff();
+  const qb = $('[data-quick]');
+  if (qb) qb.onclick = async () => {
+    if (!confirm('Passer en mode rapide ?\n\nTout ce qui reste à faire sera pré-coché et les températures pré-remplies aux valeurs de référence. Vous devrez décocher ce qui n\'est pas fait et corriger les températures réellement mesurées.')) return;
+    await applyQuick(st, etat); toast('Mode rapide activé'); render(true);
+  };
+}
+
+/* ---------- Mode rapide : « Tout vérifier » (seulement ce qui a changé ou pose problème) ---------- */
+async function viewVerif(){
+  await loadOpenService();
+  if (!S) return go('#/');
+  const st = await getSettings(), qs = quickStats();
+  const phaseOfCheck = k => PHASE[k.split('.')[0]];
+  const labelOfCheck = k => { if (k.startsWith('periodique.') || !k.includes('.')) { const p = PER[k.replace('periodique.', '')]; return p ? 'Nettoyage périodique : ' + p.t : k; }
+    const p = phaseOfCheck(k), it = p && p.items.find(i => p.k + '.' + i[0] === k); return p && it ? `${p.t} : ${it[1]}` : k; };
+  const linkOfCheck = k => { const p = phaseOfCheck(k); return '#/phase/' + (p ? p.k : 'nettoyage'); };
+  const tempLabel = key => { const [ctx, ...r] = key.split('|'); return `${r.join('|')} · ${slotText(defaultSlot(ctx))}`; };
+  const tempLink = key => { const ctx = key.split('|')[0]; return '#/phase/' + (ctx === 'open' ? 't_open' : ctx === 'close' ? 't_close' : ctx === 'lv' ? 'nettoyage' : 'buffet'); };
+  const nf = nonFaits(st);
+  const sec = (titre, items, vide) => `<div class="card"><h3>${titre} (${items.length})</h3>${items.length ? `<div class="vlist">${items.join('')}</div>` : `<p class="muted small" style="margin:0">${vide}</p>`}</div>`;
+  V.innerHTML = `<a href="#/" class="small muted">← Service</a><h2>🔎 Tout vérifier</h2>
+    <p class="hint">Uniquement ce qui a été décoché, modifié, non relevé ou hors cible${qs ? '' : ' (mode rapide non activé)'}.</p>
+    ${qs ? sec('Tâches décochées', qs.decochees.map(k => `<a href="${linkOfCheck(k)}">☐ ${esc(labelOfCheck(k))}</a>`), 'Aucune : toutes les tâches pré-cochées sont gardées.') +
+      sec('Températures non relevées', qs.nonReleves.map(k => `<a href="${tempLink(k)}">— ${esc(tempLabel(k))}</a>`), 'Aucune.') +
+      sec('Températures modifiées', qs.modifiees.map(t => `<a href="${tempLink(t.key)}">${esc(t.obj)} · ${esc(slotText(t.slot))} : ${fmtT(t.prefill)} → <b>${fmtT(t.v)}</b></a>`), 'Aucune : toutes les valeurs pré-remplies sont gardées.') : ''}
+    ${sec('Hors cible ou non conformes', S.temps.filter(t => (t.re ? t.re.cls : t.cls) !== 'ok').map(t => `<a href="${tempLink(t.key)}">${esc(t.obj)} · ${esc(slotText(t.slot || defaultSlot(t.ctx)))} : <b>${fmtT(t.re ? t.re.v : t.v)}</b> ${verdictTag(t.re || t)}</a>`), 'Aucun.')}
+    ${sec('Tout ce qui reste non réalisé', nf.map(x => `<div class="small" style="padding:6px 0;border-bottom:1px solid var(--line)">${esc(x)}</div>`), 'Rien.')}
+    <a class="btn block primary" href="#/phase/cloture">Aller à la clôture</a>`;
 }
 // Relève en cours de service (ex. la nuit fait les cuissons, le PDJ continue)
 async function openHandoff(){
@@ -1094,6 +1204,8 @@ async function viewStart(st, etat){
       ${stepper('reserved', pick.reserved ?? '', 1)}
       <p class="small muted" style="margin:8px 0 0">Selon la liste PDJ du jour (Opera). Sert au calcul des cuissons.</p>
     </div>
+    ${st.quickAllowed ? `<div class="card"><button type="button" class="ck${pick.quick ? ' on' : ''}" id="quickpick"><span class="box">${pick.quick ? '✓' : ''}</span>
+      <span><b>⚡ Mode rapide</b> <span class="small muted">(personnel expérimenté)</span><span class="h">Tout est pré-coché et les températures pré-remplies aux valeurs de référence conformes. Vous décochez ce qui n'est pas fait et vous corrigez les températures réellement mesurées.</span></span></button></div>` : ''}
     <button class="btn hero primary" id="start" ${pick.name && eng && eng.ok && pick.reserved !== null ? '' : 'disabled'}>☕ Commencer le service</button>
     ${ho ? `<div class="card" style="margin-top:14px"><h3>📨 Passation du service précédent</h3>
       <p class="small muted" style="margin:0 0 6px">${esc(ho.by || '')} · ${fmt(ho.at)}</p>
@@ -1107,11 +1219,14 @@ async function viewStart(st, etat){
   const add = () => { const v = $('#newname').value.trim(); if (v.split(/\s+/).length < 2) return toast('Prénom et nom, s\'il vous plaît', true); pick.name = v; render(true); };
   $('#addname').onclick = add; $('#newname').onkeydown = e => { if (e.key === 'Enter') add(); };
   bindSteppers(V, (k, v) => { pick.reserved = v; $('#start').disabled = !(pick.name && eng && eng.ok && v !== null); });
+  const qp = $('#quickpick'); if (qp) qp.onclick = () => { pick.quick = !pick.quick; render(true); };
   $('#start').onclick = async () => {
     await rememberName(pick.name);
     S = newService(pick.name, pick.reserved);
     await saveS();
-    pick = { name:'', reserved:null };
+    const quick = pick.quick;
+    pick = { name:'', reserved:null, quick:false };
+    if (quick){ await applyQuick(st, etat); toast('Mode rapide : vérifiez et décochez ce qui n\'est pas fait'); return go('#/'); }
     toast('Service commencé — bon service !');
     go('#/phase/poste');
   };
@@ -1187,34 +1302,54 @@ function checkItem(p, it){
   const help = p.type === 'nettoyage' ? '' : it[2];
   const link = p.type === 'nettoyage' && it[2] ? `<a class="small" href="#/fiche/${it[2]}" onclick="event.stopPropagation()">Comment faire ›</a>` : '';
   return `<div><button type="button" class="ck${c ? ' on' : ''}" data-ck="${k}"><span class="box">${c ? '✓' : ''}</span>
-    <span><b>${esc(it[1])}</b>${help ? `<span class="h">${esc(help)}</span>` : ''}${c ? `<span class="who">${esc(initials(c.by))} · ${fmtH(c.at)}</span>` : ''}</span></button>${link ? `<div style="text-align:right;margin-top:2px">${link}</div>` : ''}</div>`;
+    <span><b>${esc(it[1])}</b>${help ? `<span class="h">${esc(help)}</span>` : ''}${c ? `<span class="who">${esc(initials(c.by))}${c.pre ? ' · pré-coché ⚡' : ''}</span>` : ''}</span></button>${link ? `<div style="text-align:right;margin-top:2px">${link}</div>` : ''}</div>`;
 }
 const checksHtml = p => `<div class="checks">${p.items.map(it => checkItem(p, it)).join('')}</div>`;
+// Cocher / décocher. En mode rapide, décocher une tâche pré-cochée est tracé (onglet Audit du registre).
 function wireChecks(){
   $$('[data-ck]').forEach(b => b.onclick = async () => {
     const k = b.dataset.ck;
-    if (S.checks[k]) delete S.checks[k]; else S.checks[k] = { at: nowIso(), by: S.operator };
+    if (S.checks[k]) { if (S.checks[k].pre) quickLog('Décoché', k); delete S.checks[k]; }
+    else { S.checks[k] = { at: nowIso(), by: S.operator }; if (S.quick && S.quick.checks.includes(k)) quickLog('Recoché', k); }
     await saveS(); render(true);
   });
 }
 
 /* ---------- Températures : saisie ---------- */
+// Créneau du relevé : prévu d'office selon le contrôle, modifiable si le relevé a été fait à un autre moment
+function slotSelect(id, cur){
+  const opts = SLOT_KEYS.concat(cur === 'lv' ? ['lv'] : []).concat(['autre']);
+  return `<select class="slotsel" data-slot="${id}" aria-label="Créneau du relevé">${opts.map(k => `<option value="${k}"${k === cur ? ' selected' : ''}>${esc(slotText(k))}</option>`).join('')}</select>`;
+}
 function tempRow(ctx, obj, kind, ctxLabel, lim){
   const t = getTemp(ctx, obj);
   const id = esc(tempKey(ctx, obj));
+  const limTxt = lim !== undefined && lim !== null && lim !== '' ? ` <span class="small muted">(limite ≤ ${fmtT(lim)})</span>` : '';
+  if (t && t.pre){
+    // Mode rapide : valeur de référence pré-remplie, à corriger si la mesure réelle diffère
+    return `<div class="trow pre"><div class="n"><span>${esc(obj)}${limTxt}</span>${verdictTag(t)}</div>
+      <div class="tin"><button type="button" class="sign" data-sign aria-label="Changer le signe">±</button>
+        <input class="inp" inputmode="decimal" value="${esc(fmtN(t.v))}" aria-label="Température ${esc(obj)}">
+        <span>°C</span><button class="btn small ghost" data-tok="${id}" data-kind="${kind}" data-ctxl="${esc(ctxLabel)}" data-lim="${lim ?? ''}">Enregistrer</button></div>
+      <div class="tmeta qrow">⚡ Pré-rempli · ${slotSelect(id, t.slot)}</div>
+      <button class="btn small ghost" data-nr="${id}" style="margin-top:6px">Pas relevé</button></div>`;
+  }
   if (t){
-    const re = t.re ? `<div class="tmeta">Re-mesure ${fmtH(t.re.at)} : <b>${fmtT(t.re.v)}</b> ${verdictTag(t.re)}</div>` : '';
+    const re = t.re ? `<div class="tmeta">Re-mesure : <b>${fmtT(t.re.v)}</b> ${verdictTag(t.re)}</div>` : '';
     const needRe = t.mustRemeasure && !t.re;
+    const pf = t.prefill !== undefined && t.prefill !== null && t.prefill !== t.v ? ` · modifié (pré-rempli ${fmtT(t.prefill)})` : '';
     return `<div class="trow"><div class="n"><span>${esc(obj)}</span>${verdictTag(t)}</div>
-      <div><span class="tval">${fmtT(t.v)}</span> <span class="tmeta">· ${fmtH(t.at)} · ${esc(initials(t.by))}</span></div>
+      <div><span class="tval">${fmtT(t.v)}</span> <span class="tmeta">· ${esc(initials(t.by))}${pf}</span></div>
+      <div class="tmeta qrow">Créneau : ${slotSelect(id, t.slot || defaultSlot(ctx))}</div>
       ${t.action ? `<div class="tmeta">Action : ${esc(t.action)}</div>` : ''}${t.msg ? `<div class="tmeta">${esc(t.msg)}</div>` : ''}${re}
       <div class="row" style="margin-top:6px">${t.cls !== 'ok' || needRe ? `<button class="btn small ${needRe ? 'primary' : 'ghost'}" data-re="${id}" data-kind="${kind}">Re-mesurer</button>` : ''}
       <button class="btn small ghost" data-fix="${id}" data-kind="${kind}">Corriger</button></div></div>`;
   }
-  return `<div class="trow" data-trow="${id}"><div class="n"><span>${esc(obj)}${lim !== undefined && lim !== null && lim !== '' ? ` <span class="small muted">(limite ≤ ${fmtT(lim)})</span>` : ''}</span><span class="pill p-todo">À relever</span></div>
+  return `<div class="trow" data-trow="${id}"><div class="n"><span>${esc(obj)}${limTxt}</span><span class="pill p-todo">À relever</span></div>
     <div class="tin"><button type="button" class="sign" data-sign aria-label="Changer le signe">±</button>
       <input class="inp" inputmode="decimal" placeholder="mesure" aria-label="Température ${esc(obj)}">
-      <span>°C</span><button class="btn small primary" data-tok="${id}" data-kind="${kind}" data-ctxl="${esc(ctxLabel)}" data-lim="${lim ?? ''}">OK</button></div></div>`;
+      <span>°C</span><button class="btn small primary" data-tok="${id}" data-kind="${kind}" data-ctxl="${esc(ctxLabel)}" data-lim="${lim ?? ''}">OK</button></div>
+    <div class="tmeta qrow">Créneau : ${slotSelect(id, defaultSlot(ctx))}</div></div>`;
 }
 function enceintesHtml(p, st){
   return `<div class="rule info">🌡️ Thermomètre à sonde glissé entre deux produits, <b>pas l'afficheur du frigo</b>. Désinfectez la sonde après usage.<br>
@@ -1226,7 +1361,7 @@ function buffetHtml(st){
   return `<div class="rule info">Buffet chaud : limite légale <b>≥ 60 °C à cœur</b> · cible interne ≥ 65 °C.<br>Buffet froid : limite légale <b>≤ 7 °C</b> · cible interne ≤ 5 °C.<br>Sonde au cœur du produit, désinfectée entre deux produits.</div>` +
     ['r1','r2','r3'].map((r, i) => {
       const all = st.chaud.concat(st.froid), done = all.filter(o => getTemp(r, o)).length;
-      return `<div class="round-h"><b>${st.rounds[i]} · ${labels[i]}</b><span class="pill ${done === all.length ? 'p-ok' : nowHM() > addMin(st.rounds[i], 20) ? 'p-late' : 'p-todo'}">${done}/${all.length}</span></div>
+      return `<div class="round-h"><b>${slotRange(r, st)} · ${labels[i]}</b><span class="pill ${done === all.length ? 'p-ok' : nowHM() > addMin(st.rounds[i], 20) ? 'p-late' : 'p-todo'}">${done}/${all.length}</span></div>
       <div class="sec" style="margin-top:4px">Chaud</div>${st.chaud.map(o => tempRow(r, o, 'chaud', 'Buffet ' + st.rounds[i])).join('')}
       <div class="sec">Froid</div>${st.froid.map(o => tempRow(r, o, 'froid', 'Buffet ' + st.rounds[i])).join('')}`;
     }).join('');
@@ -1236,17 +1371,34 @@ function wireTemps(){
   $$('[data-tok]').forEach(b => b.onclick = () => {
     const inp = b.parentElement.querySelector('input'), v = toNum(inp.value);
     if (v === null) return toast('Tapez la température mesurée', true);
+    const sel = $(`[data-slot="${CSS.escape(b.dataset.tok)}"]`);
     const [ctx, ...rest] = b.dataset.tok.split('|');
-    recordTemp(ctx, rest.join('|'), b.dataset.kind, v, b.dataset.ctxl, null, toNum(b.dataset.lim));
+    recordTemp(ctx, rest.join('|'), b.dataset.kind, v, b.dataset.ctxl, null, toNum(b.dataset.lim), { slot: sel ? sel.value : null });
+  });
+  // Changement de créneau d'un relevé déjà enregistré
+  $$('[data-slot]').forEach(sel => sel.onchange = async () => {
+    const t = S.temps.find(x => x.key === sel.dataset.slot); if (!t) return;
+    t.slot = sel.value; await saveS(); toast('Créneau : ' + slotText(sel.value));
+  });
+  // Mode rapide : « Pas relevé » retire la valeur pré-remplie (le relevé apparaît alors comme non réalisé)
+  $$('[data-nr]').forEach(b => b.onclick = async () => {
+    const t = S.temps.find(x => x.key === b.dataset.nr); if (!t) return;
+    S.temps = S.temps.filter(x => x.key !== t.key);
+    quickLog('Non relevé', t.key, { prefill:t.prefill });
+    await saveS(); toast(`${t.obj} : marqué non relevé`); render(true);
   });
   $$('[data-re]').forEach(b => b.onclick = () => openRemeasure(b.dataset.re, b.dataset.kind));
   $$('[data-fix]').forEach(b => b.onclick = () => openFix(b.dataset.fix, b.dataset.kind));
 }
-async function recordTemp(ctx, obj, kind, v, ctxLabel, hist, lim){
+async function recordTemp(ctx, obj, kind, v, ctxLabel, hist, lim, extra){
   const [lo, hi] = PLAUSIBLE[kind];
   if ((v < lo || v > hi) && !confirm(`${fmtT(v)} pour « ${obj} » : valeur inhabituelle. Confirmez-vous cette mesure ?`)) return false;
   const ev = evalT(kind, v, lim);
-  const t = { lim, key:tempKey(ctx, obj), ctx, ctxLabel, obj, kind, v, at:nowIso(), by:S.operator, verdict:ev.verdict, cls:ev.cls, msg:ev.msg || '', ref:REF.version, mustRemeasure:!!ev.mustRemeasure };
+  const old = getTemp(ctx, obj);
+  const t = { lim, key:tempKey(ctx, obj), ctx, ctxLabel, obj, kind, v, at:nowIso(), by:S.operator, verdict:ev.verdict, cls:ev.cls, msg:ev.msg || '', ref:REF.version, mustRemeasure:!!ev.mustRemeasure,
+    slot: (extra && extra.slot) || (old && old.slot) || defaultSlot(ctx) };
+  // Valeur pré-remplie remplacée par la mesure réelle : on garde la trace de la valeur de départ (audit)
+  if (old && old.prefill !== undefined && old.prefill !== null) { t.prefill = old.prefill; if (old.pre && v !== old.prefill) quickLog('Température modifiée', t.key, { prefill:old.prefill, v }); }
   if (hist) t.hist = hist;
   const put = () => { S.temps = S.temps.filter(x => x.key !== t.key); S.temps.push(t); };
   if (!ev.todo){ put(); await saveS(); toast(`${obj} : ${fmtT(v)} — ${ev.verdict}`); return render(true); }
@@ -1294,7 +1446,7 @@ async function addEcart(e){
 function openRemeasure(key, kind){
   const t = S.temps.find(x => x.key === key); if (!t) return;
   $('#sheet').innerHTML = `<div class="sheet-bg"><div class="sheet"><div class="sheet-head"><h3 style="margin:0">Re-mesure : ${esc(t.obj)}</h3><button class="btn small ghost" data-close>✕</button></div>
-    <p class="muted">Première mesure : ${fmtT(t.v)} à ${fmtH(t.at)} (${esc(t.verdict)}).</p>
+    <p class="muted">Première mesure : ${fmtT(t.v)} (${esc(t.verdict)}), créneau ${esc(slotText(t.slot || defaultSlot(t.ctx)))}.</p>
     <div class="tin"><button type="button" class="sign" data-sign>±</button><input class="inp" inputmode="decimal" id="rev"><span>°C</span></div>
     <button class="btn block primary" style="margin-top:14px" id="resave">Enregistrer la re-mesure</button></div></div>`;
   const sh = $('#sheet');
@@ -1398,7 +1550,7 @@ function nettoyageHtml(p, etat){
     ${due.length ? due.map(x => {
       const done = S.periodic[x.p.k];
       return `<div><button type="button" class="ck${done ? ' on' : ''}" data-per="${x.p.k}"><span class="box">${done ? '✓' : ''}</span>
-        <span><b>${esc(x.p.t)}</b><span class="h">${esc(FREQ[x.p.f].l)}${x.p.day !== undefined ? ' · le ' + DAYS[x.p.day] : ''} · dernier : ${x.last ? fmtD(x.last) : 'jamais enregistré'}${x.late ? ' · EN RETARD' : ''}</span>${done ? `<span class="who">${esc(initials(done.by))} · ${fmtH(done.at)}</span>` : ''}</span></button>
+        <span><b>${esc(x.p.t)}</b><span class="h">${esc(FREQ[x.p.f].l)}${x.p.day !== undefined ? ' · le ' + DAYS[x.p.day] : ''} · dernier : ${x.last ? fmtD(x.last) : 'jamais enregistré'}${x.late ? ' · EN RETARD' : ''}</span>${done ? `<span class="who">${esc(initials(done.by))}${done.pre ? ' · pré-coché ⚡' : ''}</span>` : ''}</span></button>
         <div style="text-align:right;margin-top:2px"><a class="small" href="#/fiche/${x.p.fiche}">Comment faire ›</a></div>
         ${x.p.temp ? `<div style="margin-top:6px">${tempRow('lv', 'Lave-vaisselle (rinçage)', 'lv', 'Contrôle hebdomadaire')}</div>` : ''}</div>`;
     }).join('') : '<p class="muted">Aucun nettoyage périodique dû aujourd\'hui.</p>'}
@@ -1407,7 +1559,8 @@ function nettoyageHtml(p, etat){
 function wireNettoyage(){
   $$('[data-per]').forEach(b => b.onclick = async () => {
     const k = b.dataset.per;
-    if (S.periodic[k]) delete S.periodic[k]; else S.periodic[k] = { at:nowIso(), by:S.operator };
+    if (S.periodic[k]) { if (S.periodic[k].pre) quickLog('Décoché', 'periodique.' + k); delete S.periodic[k]; }
+    else S.periodic[k] = { at:nowIso(), by:S.operator };
     await saveS(); render(true);
   });
 }
@@ -1457,7 +1610,12 @@ async function viewCloture(st, etat){
   const dueNotDone = dueToday(etat).filter(x => !S.periodic[x.p.k]);
   const conso = (c.adultes || 0) + (c.enfants || 0) + (c.offerts || 0);
   const diff = c.factures === undefined || c.factures === null ? null : conso - (c.offerts || 0) - c.factures;
+  const qs = quickStats();
   V.innerHTML = `<a href="#/" class="small muted">← Service</a><h2>✍️ Clôture & passation</h2><p class="hint">Dernière étape : chiffres, pertes, passation, signature.</p>
+    ${qs ? `<div class="quickbar"><b>⚡ Mode rapide activé :</b> toutes les tâches et températures standards ont été pré-remplies. Vérifiez et décochez / modifiez ce qui n'a pas réellement été fait.<br>
+      <span class="small">${quickLine(qs)}</span><br><a class="btn small ghost" href="#/verif">🔎 Tout vérifier</a>
+      <button type="button" class="ck${S.quickVerified ? ' on' : ''}" id="qver" style="margin-top:10px"><span class="box">${S.quickVerified ? '✓' : ''}</span>
+        <span><b>J'ai vérifié</b><span class="h">Ce qui n'a pas été fait est décoché ou marqué « pas relevé », les températures réellement mesurées sont saisies.</span></span></button></div>` : ''}
     <div class="card"><h3>Petits-déjeuners</h3>
       <dl class="kv" style="margin-bottom:8px"><dt>Réservés</dt><dd>${S.reserved ?? '—'}</dd></dl>
       <label class="f">Consommés — adultes</label>${stepper('adultes', c.adultes ?? '', 1)}
@@ -1490,8 +1648,10 @@ async function viewCloture(st, etat){
   $('#handover').onchange = async e => { S.handover = e.target.value.trim(); await saveS(); };
   if ($('#nfm')) $('#nfm').onchange = async e => { S.nonFaitMotif = e.target.value.trim(); await saveS(); };
   const sig = wireSignature(V);
+  const qv = $('#qver'); if (qv) qv.onclick = async () => { S.quickVerified = !S.quickVerified; if (S.quickVerified) quickLog('Vérification confirmée', ''); await saveS(); render(true); };
   $('#close').onclick = async () => {
     S.counts.explication = $('#expl').value.trim(); S.handover = $('#handover').value.trim(); if ($('#nfm')) S.nonFaitMotif = $('#nfm').value.trim();
+    if (S.quick && !S.quickVerified) return toast('Mode rapide : confirmez « J\'ai vérifié » en haut de la page', true);
     const cc = S.counts, co = (cc.adultes || 0) + (cc.enfants || 0) + (cc.offerts || 0);
     if (cc.adultes === undefined || cc.adultes === null) return toast('Indiquez le nombre de PDJ consommés (adultes)', true);
     if (cc.factures === undefined || cc.factures === null) return toast('Indiquez le nombre de PDJ facturés', true);
@@ -1526,20 +1686,27 @@ function handoverOf(r){
 function buildReport(st, etat, nf, dueNotDone){
   const c = S.counts, conso = (c.adultes || 0) + (c.enfants || 0) + (c.offerts || 0);
   const checks = [];
-  PHASES.forEach(p => (p.items || []).forEach(it => { const k = p.k + '.' + it[0], v = S.checks[k]; checks.push({ phase:p.t, label:it[1], status:v ? 'Fait' : 'Non fait', at:v ? v.at : '', by:v ? v.by : '' }); }));
-  const periodic = dueToday(etat).map(x => ({ k:x.p.k, t:x.p.t, freq:FREQ[x.p.f].l, status:S.periodic[x.p.k] ? 'Fait' : 'Non fait', at:S.periodic[x.p.k] ? S.periodic[x.p.k].at : '', by:S.periodic[x.p.k] ? S.periodic[x.p.k].by : '' }));
+  // « at » = horodatage technique de la saisie : il part dans les données (onglet Audit), jamais dans le rapport opérationnel
+  PHASES.forEach(p => (p.items || []).forEach(it => { const k = p.k + '.' + it[0], v = S.checks[k]; checks.push({ k, phase:p.t, label:it[1], status:v ? 'Fait' : 'Non fait', at:v ? v.at : '', by:v ? v.by : '', pre:!!(v && v.pre) }); }));
+  const periodic = dueToday(etat).map(x => { const v = S.periodic[x.p.k]; return { k:x.p.k, t:x.p.t, freq:FREQ[x.p.f].l, status:v ? 'Fait' : 'Non fait', at:v ? v.at : '', by:v ? v.by : '', pre:!!(v && v.pre) }; });
   const losses = [];
   LOSSES.forEach(([g, u, list]) => list.forEach(n => { if (S.losses[n]) losses.push({ p:n, q:S.losses[n], u, m:'Non consommé' }); }));
   S.retires.forEach(r => losses.push({ p:r.p, q:r.q, u:'', m:r.m }));
-  const temps = S.temps.map(t => ({ ctx:t.ctxLabel, obj:t.obj, kind:KIND_LABEL[t.kind], v:t.v, at:t.at, by:t.by, verdict:t.verdict, action:t.action || '', cause:t.cause || '', note:t.note || '',
-    re: t.re ? { v:t.re.v, at:t.re.at, verdict:t.re.verdict } : null, hist:t.hist || [], ref:t.ref }));
+  const temps = S.temps.map(t => { const slot = t.slot || defaultSlot(t.ctx);
+    return { ctx:t.ctxLabel, obj:t.obj, kind:KIND_LABEL[t.kind], v:t.v, at:t.at, by:t.by, verdict:t.verdict, action:t.action || '', cause:t.cause || '', note:t.note || '',
+      slot, slotLabel:slotText(slot, st), pre:!!t.pre, prefill: t.prefill !== undefined ? t.prefill : null,
+      re: t.re ? { v:t.re.v, at:t.re.at, verdict:t.re.verdict } : null, hist:t.hist || [], ref:t.ref }; });
+  const qs = quickStats();
+  const quick = qs ? { at:S.quick.at, decochees:qs.decochees.length, nonReleves:qs.nonReleves.length, modifiees:qs.modifiees.length, verifie:!!S.quickVerified,
+    log:(S.quickLog || []).map(l => ({ at:l.at, by:l.by, type:l.type, what:l.what, prefill:l.prefill ?? null, v:l.v ?? null })) } : null;
   const ecarts = S.ecarts.map(e => ({ id:e.id, at:e.at, by:e.by, cat:e.cat, obj:e.obj, val:e.val, verdict:e.verdict, action:e.action, cause:e.cause || '', note:e.note || '', direct:!!e.direct, photo:!!e.photo }));
   return { id:S.id, date:S.date, operator:S.operator, team:(S.team || []).map(t => t.name + ' (' + fmtH(t.at) + ')'), cookBy:S.cook.by, cookQty:S.cook.qty, startedAt:S.startedAt, closedAt:S.closedAt, reserved:S.reserved,
     weekend:S.weekend, holiday:S.holiday,
     counts:{ adultes:c.adultes || 0, enfants:c.enfants || 0, offerts:c.offerts || 0, total:conso, factures:c.factures, annulations:c.annulations || 0, diff: conso - (c.offerts || 0) - (c.factures || 0), explication:c.explication || '' },
     temps, checks, periodic, losses, surplus:(S.surplus || []).map(x => ({ p:x.p, q:x.q, type:SURPLUS_TYPES[x.type], dest:x.dest, at:x.at, until:x.until, by:x.by })), missing:S.missing.concat(S.missingOther ? [S.missingOther] : []), handover:S.handover,
     nonFait: nf.concat(dueNotDone.map(x => 'Nettoyage périodique : ' + x.p.t)), nonFaitMotif:S.nonFaitMotif, ecarts,
-    result: S.ecarts.length || nf.length ? 'Écarts' : 'Conforme', ref:REF.version, app:APP_VERSION };
+    result: S.ecarts.length || nf.length ? 'Écarts' : 'Conforme', ref:REF.version, app:APP_VERSION,
+    quick, mention:'Relevés réalisés selon le plan de contrôle interne.' };
 }
 
 /* ============================================================
@@ -1779,7 +1946,7 @@ async function viewHist(){
     V.innerHTML = `<a href="#/hist" class="small muted">← Services</a><h2>${esc(s.id)}</h2><p class="hint">${esc(s.operator)} · ${fmt(s.startedAt)} → ${s.closedAt ? fmt(s.closedAt) : 'en cours'}</p>
       ${r ? `<div class="card"><dl class="kv"><dt>Résultat</dt><dd>${esc(r.result)}</dd><dt>Réservés</dt><dd>${r.reserved}</dd><dt>Consommés</dt><dd>${r.counts.total} (adultes ${r.counts.adultes}, enfants ${r.counts.enfants}, offerts ${r.counts.offerts})</dd><dt>Facturés</dt><dd>${r.counts.factures}</dd><dt>Écarts</dt><dd>${r.ecarts.length}</dd><dt>Non réalisé</dt><dd>${r.nonFait.length}</dd><dt>Rapport</dt><dd>${s.sentAt ? 'Envoyé le ' + fmt(s.sentAt) : 'En attente d\'envoi'}</dd></dl></div>
       <div class="card"><h3>Températures</h3><table class="t">${r.temps.map(t => `<tr><td class="small">${esc(t.ctx)}</td><td>${esc(t.obj)}</td><td><b>${fmtT(t.v)}</b></td><td class="small">${esc(t.verdict)}${t.re ? ' → ' + fmtT(t.re.v) : ''}</td></tr>`).join('')}</table></div>
-      ${r.ecarts.length ? `<div class="card"><h3>Écarts</h3><ul class="tight">${r.ecarts.map(e => `<li>${fmtH(e.at)} · <b>${esc(e.obj || e.cat)}</b> ${esc(e.val || '')} — ${esc(e.action || '')}</li>`).join('')}</ul></div>` : ''}
+      ${r.ecarts.length ? `<div class="card"><h3>Écarts</h3><ul class="tight">${r.ecarts.map(e => `<li><b>${esc(e.obj || e.cat)}</b> ${esc(e.val || '')} — ${esc(e.action || '')}</li>`).join('')}</ul></div>` : ''}
       ${r.handover ? `<div class="card"><h3>Passation</h3><p>${esc(r.handover)}</p></div>` : ''}` : '<p class="muted">Service non clôturé.</p>'}`;
     return;
   }
@@ -1836,7 +2003,12 @@ async function viewSettings(){
       <p class="small muted">Toute modification d'un seuil doit être validée par le responsable HACCP (elle est tracée sur chaque relevé).</p></div>
     <div class="card"><h3>Buffet chaud à relever</h3>${listEdit('chaud', s.chaud, esc)}<div class="row"><input class="inp" id="chaudn" style="flex:1"><button class="btn small ghost" id="chaudadd">+</button></div></div>
     <div class="card"><h3>Buffet froid à relever</h3>${listEdit('froid', s.froid, esc)}<div class="row"><input class="inp" id="froidn" style="flex:1"><button class="btn small ghost" id="froidadd">+</button></div></div>
-    <div class="card"><h3>Heures des relevés du buffet</h3><div class="row">${s.rounds.map((r, i) => `<input class="inp" type="time" data-round="${i}" value="${esc(r)}" style="flex:1 1 90px">`).join('')}</div></div>
+    <div class="card"><h3>Créneaux des relevés de température</h3>
+      <p class="small muted" style="margin-top:-6px">Plan de contrôle interne : chaque relevé est rattaché d'office à son créneau. Le rapport affiche le créneau, jamais l'heure exacte de saisie (conservée dans l'onglet Audit du registre).</p>
+      ${SLOT_KEYS.map(k => `<label class="f">${esc(SLOT_LABEL[k])}</label><div class="row"><input class="inp" type="time" data-slotfrom="${k}" value="${esc(s.slots[k][0])}" style="flex:1 1 110px"><span style="align-self:center">→</span><input class="inp" type="time" data-slotto="${k}" value="${esc(s.slots[k][1])}" style="flex:1 1 110px"></div>`).join('')}
+      <p class="small muted">Les créneaux du buffet donnent aussi l'heure du rappel « C'est l'heure » à l'accueil.</p></div>
+    <div class="card"><h3>Mode rapide</h3>
+      <button type="button" class="ck${s.quickAllowed ? ' on' : ''}" id="qallow"><span class="box">${s.quickAllowed ? '✓' : ''}</span><span><b>Autoriser le mode rapide</b><span class="h">Pré-coche les tâches et pré-remplit les températures aux valeurs de référence conformes (frigo ${fmtT(REF.pos.cible)}, congélateur ${fmtT(REF.neg.legal)}, buffet froid ${fmtT(REF.froid.cible)}, buffet chaud ${fmtT(REF.chaud.cible)}). L'opérateur décoche et corrige ; tout est tracé dans l'onglet Audit.</span></span></button></div>
     <div class="card"><h3>Thermomètre</h3><label class="f">N° / identification</label><input class="inp" id="thid" value="${esc(s.thermoId)}">
       <label class="f">Dernier contrôle (eau bouillante 100 °C)</label><input class="inp" type="date" id="thcal" value="${esc(s.thermoCalib)}"></div>
     <div class="card"><h3>Code responsable</h3><p class="small muted">Protège ces réglages et le QR de configuration. Laisser vide = pas de code.</p><input class="inp" id="newpin" inputmode="numeric" value="${esc(s.pin)}" placeholder="4 chiffres"></div>
@@ -1874,9 +2046,17 @@ async function viewSettings(){
   };
   $('#chaudadd').onclick = async () => { const v = $('#chaudn').value.trim(); if (!v) return; const n = await getSettings(); n.chaud = n.chaud.concat(v); await saveSettings(n); render(true); };
   $('#froidadd').onclick = async () => { const v = $('#froidn').value.trim(); if (!v) return; const n = await getSettings(); n.froid = n.froid.concat(v); await saveSettings(n); render(true); };
+  $('#qallow').onclick = async () => { const n = await getSettings(); n.quickAllowed = !n.quickAllowed; await saveSettings(n); render(true); };
   $('#saveall').onclick = async () => {
     const n = await getSettings();
-    n.rounds = $$('[data-round]').map(i => i.value || DEFAULTS.rounds[+i.dataset.round]);
+    const slots = {};
+    for (const k of SLOT_KEYS){
+      const a = $(`[data-slotfrom="${k}"]`).value || DEFAULTS.slots[k][0], b = $(`[data-slotto="${k}"]`).value || DEFAULTS.slots[k][1];
+      if (b <= a) return toast(`Créneau « ${SLOT_LABEL[k]} » : l'heure de fin doit suivre l'heure de début`, true);
+      slots[k] = [a, b];
+    }
+    if (!(slots.r1[0] < slots.r2[0] && slots.r2[0] < slots.r3[0])) return toast('Les 3 créneaux du buffet doivent se suivre dans la journée', true);
+    n.slots = slots; n.rounds = ['r1','r2','r3'].map(k => slots[k][0]);
     n.thermoId = $('#thid').value.trim(); n.thermoCalib = $('#thcal').value; n.pin = $('#newpin').value.trim();
     await saveSettings(n); unlocked = true; toast('Réglages enregistrés');
   };
