@@ -106,8 +106,12 @@ code{background:#F1ECE4;padding:1px 5px;border-radius:5px;font-size:14px;word-br
 .v-tol{background:var(--accent-soft);color:var(--accent-ink);border-color:var(--accent)}
 .v-bad{background:var(--bad-soft);color:var(--bad);border-color:var(--bad)}
 .tval{font-size:22px;font-weight:800}
+.trow.lot{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 12px}
+.trow.lot .n{display:block;min-width:0;line-height:1.25}
+.trow.lot .tin{margin-top:0;flex:0 0 auto;gap:6px}
+.trow.lot .tin .inp{width:84px;font-size:20px;padding:8px}
+.trow.lot .tin .sign{width:44px;min-width:44px;height:48px}
 .tmeta{color:var(--muted);font-size:13px}
-.trow.pre{border-style:dashed;border-color:#F5C99B;background:#FFFCF7}
 .qrow{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:6px}
 .slotsel{min-height:44px;padding:6px 10px;border:2px solid var(--line);border-radius:10px;background:#fff;font-size:14px;max-width:100%}
 .quickbar{background:var(--info-soft);color:var(--info);border:1px solid #C9D0E6;border-radius:var(--radius);padding:12px 14px;margin-bottom:14px;font-size:15px}
@@ -207,7 +211,7 @@ dl.kv dt{color:var(--muted)} dl.kv dd{margin:0;font-weight:600;word-break:break-
 
 <script>
 'use strict';
-const APP_VERSION = '1.2.0';
+const APP_VERSION = '1.3.0';
 const CHARTE_VERSION = '2026-09';
 
 /* ============================================================
@@ -840,6 +844,12 @@ let unlocked = false;  // réglages déverrouillés (code responsable)
 async function loadOpenService(){
   const all = await Store.all('services');
   S = all.filter(s => !s.closedAt).sort((a, b) => b.startedAt.localeCompare(a.startedAt))[0] || null;
+  // Service commencé avant la v1.3 : une valeur pré-remplie jamais mesurée redevient « à relever »
+  if (S && S.temps.some(t => t.pre)) {
+    S.temps.filter(t => t.pre).forEach(t => quickLog('Pré-remplissage retiré (mise à jour)', t.key, { prefill:t.prefill }));
+    S.temps = S.temps.filter(t => !t.pre);
+    await saveS();
+  }
 }
 async function saveS(){ if (S) await Store.put('services', S); }
 function newService(name, reserved){
@@ -853,18 +863,9 @@ function getTemp(ctx, obj){ return S.temps.find(t => t.key === tempKey(ctx, obj)
 async function roundsOf(){ const s = await getSettings(); return s.rounds; }
 
 /* ---------- MODE RAPIDE ----------
-   Pour le personnel expérimenté : tout est pré-coché et les températures sont pré-remplies à la valeur de référence
-   conforme (cible interne). Rien n'est verrouillé : on décoche ce qui n'est pas fait, on corrige la température
-   réellement mesurée, on marque « pas relevé ». Le pré-remplissage n'est jamais une valeur non conforme.
-   Tout est tracé (pré-rempli, modifié, décoché) pour l'audit ; le rapport opérationnel indique « mode rapide ». */
-function quickValue(kind, lim){
-  if (kind === 'pos') return lim !== undefined && lim !== null && lim !== '' && lim < REF.pos.cible ? lim : REF.pos.cible;
-  if (kind === 'neg') return REF.neg.legal;
-  if (kind === 'froid') return REF.froid.cible;
-  if (kind === 'chaud') return REF.chaud.cible;
-  if (kind === 'lv') return REF.lv.ok;
-  return null;
-}
+   Pour le personnel expérimenté : les tâches sont pré-cochées, on décoche ce qui n'est pas fait.
+   Les températures ne sont jamais pré-remplies : seule une valeur lue sur le thermomètre entre dans le registre.
+   Elles se saisissent par lot sur chaque créneau. Tout est tracé pour l'audit ; le rapport indique « mode rapide ». */
 async function applyQuick(st, etat){
   const at = nowIso(), by = S.operator;
   const q = S.quick || { at, by, checks:[], periodic:[], temps:[] };
@@ -874,21 +875,15 @@ async function applyQuick(st, etat){
   }));
   const due = dueToday(etat);
   due.forEach(x => { if (!S.periodic[x.p.k]) { S.periodic[x.p.k] = { at, by, pre:true }; q.periodic.push(x.p.k); } });
-  const add = (ctx, obj, kind, ctxLabel, lim) => {
-    if (getTemp(ctx, obj)) return;                       // une mesure déjà saisie n'est jamais écrasée
-    const v = quickValue(kind, lim), ev = evalT(kind, v, lim);
-    if (v === null || ev.cls !== 'ok') return;          // jamais de pré-remplissage non conforme
-    S.temps.push({ key:tempKey(ctx, obj), ctx, ctxLabel, obj, kind, v, at, by, verdict:ev.verdict, cls:ev.cls, msg:'', ref:REF.version,
-      lim, slot:defaultSlot(ctx), pre:true, prefill:v, mustRemeasure:false });
-    q.temps.push(tempKey(ctx, obj));
-  };
-  st.enceintes.forEach(e => { add('open', e.n, e.t, 'Frigos ouverture', e.max); add('close', e.n, e.t, 'Frigos fin de service', e.max); });
-  ['r1','r2','r3'].forEach((r, i) => { st.chaud.forEach(o => add(r, o, 'chaud', 'Buffet ' + st.rounds[i])); st.froid.forEach(o => add(r, o, 'froid', 'Buffet ' + st.rounds[i])); });
-  if (due.some(x => x.p.temp)) add('lv', 'Lave-vaisselle (rinçage)', 'lv', 'Contrôle hebdomadaire');
+  // Relevés attendus : à saisir par la personne, comptés « à relever » tant qu'ils ne le sont pas
+  const add = (ctx, obj) => { const k = tempKey(ctx, obj); if (!q.temps.includes(k)) q.temps.push(k); };
+  st.enceintes.forEach(e => { add('open', e.n); add('close', e.n); });
+  ['r1','r2','r3'].forEach(r => st.chaud.concat(st.froid).forEach(o => add(r, o)));
+  if (due.some(x => x.p.temp)) add('lv', 'Lave-vaisselle (rinçage)');
   cookQty().forEach(([n, v]) => { if (S.cook.qty[n] === undefined || S.cook.qty[n] === null) S.cook.qty[n] = v; });
   S.quick = q;
   S.quickLog = S.quickLog || [];
-  S.quickLog.push({ at, by, type:'Mode rapide activé', what:`${q.checks.length + q.periodic.length} tâche(s) pré-cochée(s), ${q.temps.length} température(s) pré-remplie(s)` });
+  S.quickLog.push({ at, by, type:'Mode rapide activé', what:`${q.checks.length + q.periodic.length} tâche(s) pré-cochée(s), ${q.temps.length} température(s) à relever` });
   await saveS();
 }
 function quickLog(type, what, extra){ if (!S.quick) return; S.quickLog = (S.quickLog || []).concat(Object.assign({ at:nowIso(), by:S.operator, type, what }, extra || {})); }
@@ -897,11 +892,10 @@ function quickStats(){
   const q = S.quick;
   const decochees = q.checks.filter(k => !S.checks[k]).concat((q.periodic || []).filter(k => !S.periodic[k]));
   const nonReleves = q.temps.filter(k => !S.temps.some(t => t.key === k));
-  const modifiees = S.temps.filter(t => t.prefill !== undefined && t.prefill !== null && !t.pre && t.v !== t.prefill);
   const nc = S.temps.filter(t => (t.re ? t.re.cls : t.cls) !== 'ok');
-  return { decochees, nonReleves, modifiees, nc };
+  return { decochees, nonReleves, modifiees:[], nc };
 }
-const quickLine = qs => `${qs.decochees.length} tâche(s) décochée(s) · ${qs.modifiees.length} température(s) modifiée(s) · ${qs.nonReleves.length} non relevée(s)${qs.nc.length ? ` · <b>${qs.nc.length} hors cible</b>` : ''}`;
+const quickLine = qs => `${qs.decochees.length} tâche(s) décochée(s) · ${qs.nonReleves.length} température(s) à relever${qs.nc.length ? ` · <b>${qs.nc.length} hors cible</b>` : ''}`;
 
 // Statut d'une phase
 function phaseStatus(p, st){
@@ -1111,7 +1105,7 @@ async function viewHome(){
   const openEcarts = S.ecarts.filter(e => !e.closed).length;
   const qs = quickStats();
   V.innerHTML = await banners() + (stale ? `<div class="banner bad"><span><b>Service du ${ymdFr(S.date)} non clôturé.</b><br>Clôturez-le avant d'en commencer un nouveau.</span><a class="btn small ghost" href="#/phase/cloture">Clôturer</a></div>` : '') +
-    (qs ? `<div class="quickbar">⚡ <b>Mode rapide</b> : tout est pré-coché et pré-rempli. Décochez ce qui n'est pas fait, corrigez les températures réellement mesurées.<br><span class="small">${quickLine(qs)}</span><br><a class="btn small ghost" href="#/verif">🔎 Tout vérifier</a></div>` : '') + `
+    (qs ? `<div class="quickbar">⚡ <b>Mode rapide</b> : les tâches sont pré-cochées, décochez ce qui n'est pas fait. Saisissez les températures lues sur le thermomètre, créneau par créneau.<br><span class="small">${quickLine(qs)}</span><br><a class="btn small ghost" href="#/verif">🔎 Tout vérifier</a></div>` : '') + `
     <div class="card">
       <div class="svc-head"><div><div class="t">${esc(longDate(S.startedAt))}</div><div class="muted">${esc(S.operator)} · ${S.reserved ?? '—'} PDJ réservés · depuis ${fmtH(S.startedAt)}</div></div>
       <span class="pill ${openEcarts ? 'p-bad' : 'p-ok'}">${openEcarts ? openEcarts + ' écart(s)' : 'Aucun écart'}</span></div>
@@ -1132,7 +1126,7 @@ async function viewHome(){
   $('[data-handoff]').onclick = () => openHandoff();
   const qb = $('[data-quick]');
   if (qb) qb.onclick = async () => {
-    if (!confirm('Passer en mode rapide ?\n\nTout ce qui reste à faire sera pré-coché et les températures pré-remplies aux valeurs de référence. Vous devrez décocher ce qui n\'est pas fait et corriger les températures réellement mesurées.')) return;
+    if (!confirm('Passer en mode rapide ?\n\nLes tâches restantes seront pré-cochées : vous décochez ce qui n\'est pas fait. Les températures restent à relever et à saisir, créneau par créneau.')) return;
     await applyQuick(st, etat); toast('Mode rapide activé'); render(true);
   };
 }
@@ -1151,10 +1145,9 @@ async function viewVerif(){
   const nf = nonFaits(st);
   const sec = (titre, items, vide) => `<div class="card"><h3>${titre} (${items.length})</h3>${items.length ? `<div class="vlist">${items.join('')}</div>` : `<p class="muted small" style="margin:0">${vide}</p>`}</div>`;
   V.innerHTML = `<a href="#/" class="small muted">← Service</a><h2>🔎 Tout vérifier</h2>
-    <p class="hint">Uniquement ce qui a été décoché, modifié, non relevé ou hors cible${qs ? '' : ' (mode rapide non activé)'}.</p>
+    <p class="hint">Uniquement ce qui a été décoché, ce qui reste à relever et ce qui est hors cible${qs ? '' : ' (mode rapide non activé)'}.</p>
     ${qs ? sec('Tâches décochées', qs.decochees.map(k => `<a href="${linkOfCheck(k)}">☐ ${esc(labelOfCheck(k))}</a>`), 'Aucune : toutes les tâches pré-cochées sont gardées.') +
-      sec('Températures non relevées', qs.nonReleves.map(k => `<a href="${tempLink(k)}">— ${esc(tempLabel(k))}</a>`), 'Aucune.') +
-      sec('Températures modifiées', qs.modifiees.map(t => `<a href="${tempLink(t.key)}">${esc(t.obj)} · ${esc(slotText(t.slot))} : ${fmtT(t.prefill)} → <b>${fmtT(t.v)}</b></a>`), 'Aucune : toutes les valeurs pré-remplies sont gardées.') : ''}
+      sec('Températures à relever', qs.nonReleves.map(k => `<a href="${tempLink(k)}">— ${esc(tempLabel(k))}</a>`), 'Aucune : tout est relevé.') : ''}
     ${sec('Hors cible ou non conformes', S.temps.filter(t => (t.re ? t.re.cls : t.cls) !== 'ok').map(t => `<a href="${tempLink(t.key)}">${esc(t.obj)} · ${esc(slotText(t.slot || defaultSlot(t.ctx)))} : <b>${fmtT(t.re ? t.re.v : t.v)}</b> ${verdictTag(t.re || t)}</a>`), 'Aucun.')}
     ${sec('Tout ce qui reste non réalisé', nf.map(x => `<div class="small" style="padding:6px 0;border-bottom:1px solid var(--line)">${esc(x)}</div>`), 'Rien.')}
     <a class="btn block primary" href="#/phase/cloture">Aller à la clôture</a>`;
@@ -1205,7 +1198,7 @@ async function viewStart(st, etat){
       <p class="small muted" style="margin:8px 0 0">Selon la liste PDJ du jour (Opera). Sert au calcul des cuissons.</p>
     </div>
     ${st.quickAllowed ? `<div class="card"><button type="button" class="ck${pick.quick ? ' on' : ''}" id="quickpick"><span class="box">${pick.quick ? '✓' : ''}</span>
-      <span><b>⚡ Mode rapide</b> <span class="small muted">(personnel expérimenté)</span><span class="h">Tout est pré-coché et les températures pré-remplies aux valeurs de référence conformes. Vous décochez ce qui n'est pas fait et vous corrigez les températures réellement mesurées.</span></span></button></div>` : ''}
+      <span><b>⚡ Mode rapide</b> <span class="small muted">(personnel expérimenté)</span><span class="h">Les tâches sont pré-cochées : vous décochez ce qui n'est pas fait. Les températures se saisissent par lot, créneau par créneau, après la mesure au thermomètre.</span></span></button></div>` : ''}
     <button class="btn hero primary" id="start" ${pick.name && eng && eng.ok && pick.reserved !== null ? '' : 'disabled'}>☕ Commencer le service</button>
     ${ho ? `<div class="card" style="margin-top:14px"><h3>📨 Passation du service précédent</h3>
       <p class="small muted" style="margin:0 0 6px">${esc(ho.by || '')} · ${fmt(ho.at)}</p>
@@ -1325,36 +1318,36 @@ function tempRow(ctx, obj, kind, ctxLabel, lim){
   const t = getTemp(ctx, obj);
   const id = esc(tempKey(ctx, obj));
   const limTxt = lim !== undefined && lim !== null && lim !== '' ? ` <span class="small muted">(limite ≤ ${fmtT(lim)})</span>` : '';
-  if (t && t.pre){
-    // Mode rapide : valeur de référence pré-remplie, à corriger si la mesure réelle diffère
-    return `<div class="trow pre"><div class="n"><span>${esc(obj)}${limTxt}</span>${verdictTag(t)}</div>
-      <div class="tin"><button type="button" class="sign" data-sign aria-label="Changer le signe">±</button>
-        <input class="inp" inputmode="decimal" value="${esc(fmtN(t.v))}" aria-label="Température ${esc(obj)}">
-        <span>°C</span><button class="btn small ghost" data-tok="${id}" data-kind="${kind}" data-ctxl="${esc(ctxLabel)}" data-lim="${lim ?? ''}">Enregistrer</button></div>
-      <div class="tmeta qrow">⚡ Pré-rempli · ${slotSelect(id, t.slot)}</div>
-      <button class="btn small ghost" data-nr="${id}" style="margin-top:6px">Pas relevé</button></div>`;
-  }
   if (t){
     const re = t.re ? `<div class="tmeta">Re-mesure : <b>${fmtT(t.re.v)}</b> ${verdictTag(t.re)}</div>` : '';
     const needRe = t.mustRemeasure && !t.re;
-    const pf = t.prefill !== undefined && t.prefill !== null && t.prefill !== t.v ? ` · modifié (pré-rempli ${fmtT(t.prefill)})` : '';
     return `<div class="trow"><div class="n"><span>${esc(obj)}</span>${verdictTag(t)}</div>
-      <div><span class="tval">${fmtT(t.v)}</span> <span class="tmeta">· ${esc(initials(t.by))}${pf}</span></div>
+      <div><span class="tval">${fmtT(t.v)}</span> <span class="tmeta">· ${esc(initials(t.by))}</span></div>
       <div class="tmeta qrow">Créneau : ${slotSelect(id, t.slot || defaultSlot(ctx))}</div>
       ${t.action ? `<div class="tmeta">Action : ${esc(t.action)}</div>` : ''}${t.msg ? `<div class="tmeta">${esc(t.msg)}</div>` : ''}${re}
       <div class="row" style="margin-top:6px">${t.cls !== 'ok' || needRe ? `<button class="btn small ${needRe ? 'primary' : 'ghost'}" data-re="${id}" data-kind="${kind}">Re-mesurer</button>` : ''}
       <button class="btn small ghost" data-fix="${id}" data-kind="${kind}">Corriger</button></div></div>`;
   }
+  // Créneau saisi par lot : ligne compacte, le bouton unique est sous le groupe (créneau modifiable une fois enregistré)
+  if (ctx !== 'lv') return `<div class="trow lot" data-trow="${id}" data-kind="${kind}" data-ctxl="${esc(ctxLabel)}" data-lim="${lim ?? ''}"><div class="n">${esc(obj)}${limTxt}</div>
+    <div class="tin">${kind === 'pos' || kind === 'neg' ? '<button type="button" class="sign" data-sign aria-label="Changer le signe">±</button>' : ''}
+      <input class="inp" inputmode="decimal" enterkeyhint="next" placeholder="°C" aria-label="Température ${esc(obj)}"></div></div>`;
   return `<div class="trow" data-trow="${id}"><div class="n"><span>${esc(obj)}${limTxt}</span><span class="pill p-todo">À relever</span></div>
     <div class="tin"><button type="button" class="sign" data-sign aria-label="Changer le signe">±</button>
-      <input class="inp" inputmode="decimal" placeholder="mesure" aria-label="Température ${esc(obj)}">
+      <input class="inp" inputmode="decimal" enterkeyhint="next" placeholder="mesure" aria-label="Température ${esc(obj)}">
       <span>°C</span><button class="btn small primary" data-tok="${id}" data-kind="${kind}" data-ctxl="${esc(ctxLabel)}" data-lim="${lim ?? ''}">OK</button></div>
     <div class="tmeta qrow">Créneau : ${slotSelect(id, defaultSlot(ctx))}</div></div>`;
+}
+// Bouton unique d'un créneau : enregistre d'un coup toutes les températures tapées (seulement s'il en reste à saisir)
+function batchBtn(ctx, objs){
+  const reste = objs.filter(o => !getTemp(ctx, o)).length;
+  return reste ? `<button class="btn block primary" style="margin:10px 0" data-batch="${esc(ctx)}">✓ Enregistrer ce créneau (${reste} à relever)</button>` : '';
 }
 function enceintesHtml(p, st){
   return `<div class="rule info">🌡️ Thermomètre à sonde glissé entre deux produits, <b>pas l'afficheur du frigo</b>. Désinfectez la sonde après usage.<br>
     Frigos : limite légale <b>≤ 7 °C</b> · cible interne ≤ 4 °C.<br>Congélateurs : <b>≤ −18 °C</b> (remontée tolérée jusqu'à −15 °C).</div>
-    ${st.enceintes.map(e => tempRow(p.ctx, e.n, e.t, p.ctx === 'open' ? 'Frigos ouverture' : 'Frigos fin de service', e.max)).join('')}`;
+    ${st.enceintes.map(e => tempRow(p.ctx, e.n, e.t, p.ctx === 'open' ? 'Frigos ouverture' : 'Frigos fin de service', e.max)).join('')}
+    ${batchBtn(p.ctx, st.enceintes.map(e => e.n))}`;
 }
 function buffetHtml(st){
   const labels = ['Ouverture du buffet', 'Milieu de service', 'Fin — avant de débarrasser'];
@@ -1363,7 +1356,8 @@ function buffetHtml(st){
       const all = st.chaud.concat(st.froid), done = all.filter(o => getTemp(r, o)).length;
       return `<div class="round-h"><b>${slotRange(r, st)} · ${labels[i]}</b><span class="pill ${done === all.length ? 'p-ok' : nowHM() > addMin(st.rounds[i], 20) ? 'p-late' : 'p-todo'}">${done}/${all.length}</span></div>
       <div class="sec" style="margin-top:4px">Chaud</div>${st.chaud.map(o => tempRow(r, o, 'chaud', 'Buffet ' + st.rounds[i])).join('')}
-      <div class="sec">Froid</div>${st.froid.map(o => tempRow(r, o, 'froid', 'Buffet ' + st.rounds[i])).join('')}`;
+      <div class="sec">Froid</div>${st.froid.map(o => tempRow(r, o, 'froid', 'Buffet ' + st.rounds[i])).join('')}
+      ${batchBtn(r, all)}`;
     }).join('');
 }
 function wireTemps(){
@@ -1380,25 +1374,28 @@ function wireTemps(){
     const t = S.temps.find(x => x.key === sel.dataset.slot); if (!t) return;
     t.slot = sel.value; await saveS(); toast('Créneau : ' + slotText(sel.value));
   });
-  // Mode rapide : « Pas relevé » retire la valeur pré-remplie (le relevé apparaît alors comme non réalisé)
-  $$('[data-nr]').forEach(b => b.onclick = async () => {
-    const t = S.temps.find(x => x.key === b.dataset.nr); if (!t) return;
-    S.temps = S.temps.filter(x => x.key !== t.key);
-    quickLog('Non relevé', t.key, { prefill:t.prefill });
-    await saveS(); toast(`${t.obj} : marqué non relevé`); render(true);
+  // Saisie par lot : « Suivant » du clavier passe au relevé suivant du créneau ; un seul bouton enregistre le tout
+  $$('[data-batch]').forEach(b => {
+    const lignes = () => $$('[data-trow]').filter(l => l.dataset.trow.startsWith(b.dataset.batch + '|'));
+    const champs = lignes().map(l => $('input', l));
+    champs.forEach((c, i) => c.onkeydown = e => { if (e.key !== 'Enter') return; e.preventDefault(); if (champs[i + 1]) champs[i + 1].focus(); else b.click(); });
+    b.onclick = () => {
+      const items = lignes().map(l => { const [ctx, ...rest] = l.dataset.trow.split('|');
+        return { ctx, obj:rest.join('|'), kind:l.dataset.kind, v:toNum($('input', l).value), ctxLabel:l.dataset.ctxl, lim:toNum(l.dataset.lim) }; }).filter(x => x.v !== null);
+      if (!items.length) return toast('Tapez au moins une température mesurée', true);
+      recordBatch(items);
+    };
   });
   $$('[data-re]').forEach(b => b.onclick = () => openRemeasure(b.dataset.re, b.dataset.kind));
   $$('[data-fix]').forEach(b => b.onclick = () => openFix(b.dataset.fix, b.dataset.kind));
 }
 async function recordTemp(ctx, obj, kind, v, ctxLabel, hist, lim, extra){
   const [lo, hi] = PLAUSIBLE[kind];
-  if ((v < lo || v > hi) && !confirm(`${fmtT(v)} pour « ${obj} » : valeur inhabituelle. Confirmez-vous cette mesure ?`)) return false;
+  if (!(extra && extra.confirme) && (v < lo || v > hi) && !confirm(`${fmtT(v)} pour « ${obj} » : valeur inhabituelle. Confirmez-vous cette mesure ?`)) return false;
   const ev = evalT(kind, v, lim);
   const old = getTemp(ctx, obj);
   const t = { lim, key:tempKey(ctx, obj), ctx, ctxLabel, obj, kind, v, at:nowIso(), by:S.operator, verdict:ev.verdict, cls:ev.cls, msg:ev.msg || '', ref:REF.version, mustRemeasure:!!ev.mustRemeasure,
     slot: (extra && extra.slot) || (old && old.slot) || defaultSlot(ctx) };
-  // Valeur pré-remplie remplacée par la mesure réelle : on garde la trace de la valeur de départ (audit)
-  if (old && old.prefill !== undefined && old.prefill !== null) { t.prefill = old.prefill; if (old.pre && v !== old.prefill) quickLog('Température modifiée', t.key, { prefill:old.prefill, v }); }
   if (hist) t.hist = hist;
   const put = () => { S.temps = S.temps.filter(x => x.key !== t.key); S.temps.push(t); };
   if (!ev.todo){ put(); await saveS(); toast(`${obj} : ${fmtT(v)} — ${ev.verdict}`); return render(true); }
@@ -1406,8 +1403,33 @@ async function recordTemp(ctx, obj, kind, v, ctxLabel, hist, lim, extra){
     t.action = action; t.cause = cause; t.note = note;
     put();
     await addEcart({ ctx, cat:'Température', obj:`${obj} (${KIND_LABEL[kind]}, ${ctxLabel})`, val:fmtT(v), verdict:ev.verdict, action, cause, note, photo, critical:!!ev.critical });
+    if (extra && extra.suite) return extra.suite();
     render(true);
   }});
+}
+// Enregistre un lot : les valeurs dans les limites d'un coup, puis l'action corrective de chaque valeur hors limite, l'une après l'autre
+async function recordBatch(items){
+  const horsLimite = [];
+  let n = 0;
+  for (const it of items){
+    const [lo, hi] = PLAUSIBLE[it.kind];
+    if ((it.v < lo || it.v > hi) && !confirm(`${fmtT(it.v)} pour « ${it.obj} » : valeur inhabituelle. Confirmez-vous cette mesure ?`)) continue;
+    const ev = evalT(it.kind, it.v, it.lim);
+    if (ev.todo){ horsLimite.push(it); continue; }
+    const k = tempKey(it.ctx, it.obj);
+    S.temps = S.temps.filter(x => x.key !== k);
+    S.temps.push({ lim:it.lim, key:k, ctx:it.ctx, ctxLabel:it.ctxLabel, obj:it.obj, kind:it.kind, v:it.v, at:nowIso(), by:S.operator, verdict:ev.verdict, cls:ev.cls, msg:ev.msg || '', ref:REF.version, mustRemeasure:!!ev.mustRemeasure, slot:defaultSlot(it.ctx) });
+    n++;
+  }
+  await saveS();
+  if (n) toast(`${n} température(s) enregistrée(s)`);
+  const suite = async () => {
+    const it = horsLimite.shift();
+    if (!it) return render(true);
+    await recordTemp(it.ctx, it.obj, it.kind, it.v, it.ctxLabel, null, it.lim, { confirme:true, suite });
+  };
+  await render(true);
+  await suite();
 }
 function openEcartSheet({ title, ev, onSave }){
   let action = ev.multi ? [] : '', cause = '', photo = null;
@@ -1612,10 +1634,10 @@ async function viewCloture(st, etat){
   const diff = c.factures === undefined || c.factures === null ? null : conso - (c.offerts || 0) - c.factures;
   const qs = quickStats();
   V.innerHTML = `<a href="#/" class="small muted">← Service</a><h2>✍️ Clôture & passation</h2><p class="hint">Dernière étape : chiffres, pertes, passation, signature.</p>
-    ${qs ? `<div class="quickbar"><b>⚡ Mode rapide activé :</b> toutes les tâches et températures standards ont été pré-remplies. Vérifiez et décochez / modifiez ce qui n'a pas réellement été fait.<br>
+    ${qs ? `<div class="quickbar"><b>⚡ Mode rapide activé :</b> les tâches standards ont été pré-cochées. Décochez ce qui n'a pas réellement été fait.<br>
       <span class="small">${quickLine(qs)}</span><br><a class="btn small ghost" href="#/verif">🔎 Tout vérifier</a>
       <button type="button" class="ck${S.quickVerified ? ' on' : ''}" id="qver" style="margin-top:10px"><span class="box">${S.quickVerified ? '✓' : ''}</span>
-        <span><b>J'ai vérifié</b><span class="h">Ce qui n'a pas été fait est décoché ou marqué « pas relevé », les températures réellement mesurées sont saisies.</span></span></button></div>` : ''}
+        <span><b>J'ai vérifié</b><span class="h">Ce qui n'a pas été fait est décoché, et les températures saisies sont celles lues sur le thermomètre.</span></span></button></div>` : ''}
     <div class="card"><h3>Petits-déjeuners</h3>
       <dl class="kv" style="margin-bottom:8px"><dt>Réservés</dt><dd>${S.reserved ?? '—'}</dd></dl>
       <label class="f">Consommés — adultes</label>${stepper('adultes', c.adultes ?? '', 1)}
@@ -2008,7 +2030,7 @@ async function viewSettings(){
       ${SLOT_KEYS.map(k => `<label class="f">${esc(SLOT_LABEL[k])}</label><div class="row"><input class="inp" type="time" data-slotfrom="${k}" value="${esc(s.slots[k][0])}" style="flex:1 1 110px"><span style="align-self:center">→</span><input class="inp" type="time" data-slotto="${k}" value="${esc(s.slots[k][1])}" style="flex:1 1 110px"></div>`).join('')}
       <p class="small muted">Les créneaux du buffet donnent aussi l'heure du rappel « C'est l'heure » à l'accueil.</p></div>
     <div class="card"><h3>Mode rapide</h3>
-      <button type="button" class="ck${s.quickAllowed ? ' on' : ''}" id="qallow"><span class="box">${s.quickAllowed ? '✓' : ''}</span><span><b>Autoriser le mode rapide</b><span class="h">Pré-coche les tâches et pré-remplit les températures aux valeurs de référence conformes (frigo ${fmtT(REF.pos.cible)}, congélateur ${fmtT(REF.neg.legal)}, buffet froid ${fmtT(REF.froid.cible)}, buffet chaud ${fmtT(REF.chaud.cible)}). L'opérateur décoche et corrige ; tout est tracé dans l'onglet Audit.</span></span></button></div>
+      <button type="button" class="ck${s.quickAllowed ? ' on' : ''}" id="qallow"><span class="box">${s.quickAllowed ? '✓' : ''}</span><span><b>Autoriser le mode rapide</b><span class="h">Pré-coche les tâches : la personne décoche ce qui n'est pas fait. Les températures restent toujours à relever et à saisir.</span></span></button></div>
     <div class="card"><h3>Thermomètre</h3><label class="f">N° / identification</label><input class="inp" id="thid" value="${esc(s.thermoId)}">
       <label class="f">Dernier contrôle (eau bouillante 100 °C)</label><input class="inp" type="date" id="thcal" value="${esc(s.thermoCalib)}"></div>
     <div class="card"><h3>Code responsable</h3><p class="small muted">Protège ces réglages et le QR de configuration. Laisser vide = pas de code.</p><input class="inp" id="newpin" inputmode="numeric" value="${esc(s.pin)}" placeholder="4 chiffres"></div>
